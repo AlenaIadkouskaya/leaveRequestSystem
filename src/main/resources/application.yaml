@@ -4,7 +4,7 @@ spring:
   application:
     name: leaveRequestSystem
   datasource:
-    url: jdbc:postgresql://localhost:5432/vacations
+    url: jdbc:postgresql://localhost:8081/vacations
     username: yourName
     password: yourPassword
     driver-class-name: org.postgresql.Driver
@@ -18,3 +18,5 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+  profiles:
+    include: local
