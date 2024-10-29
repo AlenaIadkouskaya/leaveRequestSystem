@@ -1,9 +1,9 @@
-package pl.iodkovskaya.leaveRequestSystem.timerecord;
+package pl.iodkovskaya.leaveRequestSystem.model.timerecord;
 
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import pl.iodkovskaya.leaveRequestSystem.employee.User;
+import pl.iodkovskaya.leaveRequestSystem.model.user.UserEntity;
 
 import java.time.LocalDate;
 
@@ -11,7 +11,7 @@ import java.time.LocalDate;
 @Table(name = "time_records")
 @Getter
 @NoArgsConstructor
-public class TimeRecord {
+public class TimeRecordEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -19,7 +19,7 @@ public class TimeRecord {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    private User employee;
+    private UserEntity employee;
 
     @Column(name = "work_date", nullable = false)
     private LocalDate workDate;

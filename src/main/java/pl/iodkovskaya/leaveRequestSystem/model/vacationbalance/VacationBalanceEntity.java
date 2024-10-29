@@ -1,11 +1,11 @@
-package pl.iodkovskaya.leaveRequestSystem.vacationbalance;
+package pl.iodkovskaya.leaveRequestSystem.model.vacationbalance;
 
 import jakarta.persistence.*;
-import pl.iodkovskaya.leaveRequestSystem.employee.User;
+import pl.iodkovskaya.leaveRequestSystem.model.user.UserEntity;
 
 @Entity
 @Table(name = "vacation_balances")
-public class VacationBalance {
+public class VacationBalanceEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -13,7 +13,7 @@ public class VacationBalance {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    private User employee;
+    private UserEntity employee;
 
     @Column(name = "year", nullable = false)
     private Integer year;

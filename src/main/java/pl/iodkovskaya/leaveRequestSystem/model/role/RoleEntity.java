@@ -1,17 +1,17 @@
-package pl.iodkovskaya.leaveRequestSystem.role;
+package pl.iodkovskaya.leaveRequestSystem.model.role;
 
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import pl.iodkovskaya.leaveRequestSystem.employee.User;
+import pl.iodkovskaya.leaveRequestSystem.model.user.UserEntity;
 
 import java.util.Set;
 
 @Getter
 @NoArgsConstructor
 @Entity
-@Table(name = "roles")
-public class Role {
+@Table(name = "authorities")
+public class RoleEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "role_id")
@@ -21,5 +21,5 @@ public class Role {
     private String roleName;
 
     @OneToMany(mappedBy = "role")
-    private Set<User> users;
+    private Set<UserEntity> users;
 }

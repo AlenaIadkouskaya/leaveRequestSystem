@@ -1,10 +1,10 @@
-package pl.iodkovskaya.leaveRequestSystem.request;
+package pl.iodkovskaya.leaveRequestSystem.model.request;
 
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import pl.iodkovskaya.leaveRequestSystem.employee.User;
-import pl.iodkovskaya.leaveRequestSystem.enums.RequestStatus;
+import pl.iodkovskaya.leaveRequestSystem.model.user.UserEntity;
+import pl.iodkovskaya.leaveRequestSystem.model.enums.RequestStatus;
 
 import java.time.LocalDate;
 
@@ -12,7 +12,7 @@ import java.time.LocalDate;
 @Table(name = "requests")
 @Getter
 @NoArgsConstructor
-public class Request {
+public class RequestEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -20,7 +20,7 @@ public class Request {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    private User employee;
+    private UserEntity employee;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)

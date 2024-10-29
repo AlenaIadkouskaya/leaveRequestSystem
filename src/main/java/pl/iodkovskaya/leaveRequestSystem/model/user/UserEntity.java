@@ -1,15 +1,15 @@
-package pl.iodkovskaya.leaveRequestSystem.employee;
+package pl.iodkovskaya.leaveRequestSystem.model.user;
 
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import pl.iodkovskaya.leaveRequestSystem.role.Role;
+import pl.iodkovskaya.leaveRequestSystem.model.role.RoleEntity;
 
 @Entity
 @Table(name = "users")
 @Getter
 @NoArgsConstructor
-public class User {
+public class UserEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
@@ -31,6 +31,7 @@ public class User {
     private String email;
 
     @ManyToOne
-    @JoinColumn(name = "role_id")
-    private Role role;
+    @JoinColumn(name = "role_id", foreignKey = @ForeignKey(name = "fk_role"))
+    private RoleEntity role;
+
 }
