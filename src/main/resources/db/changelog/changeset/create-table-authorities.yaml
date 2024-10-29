@@ -1,0 +1,20 @@
+databaseChangeLog:
+  - changeSet:
+      id: "1"
+      author: Alena Iadkouskaya
+      changes:
+        - createTable:
+            tableName: authorities
+            columns:
+              - column:
+                  name: role_id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: role_name
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false

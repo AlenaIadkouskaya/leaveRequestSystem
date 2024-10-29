@@ -1,0 +1,5 @@
+databaseChangeLog:
+  - include:
+      file: db/changelog/changeset/create-table-authorities.yaml
+  - include:
+      file: db/changelog/changeset/insert-authorities.yaml

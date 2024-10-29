@@ -1,0 +1,41 @@
+databaseChangeLog:
+  - changeSet:
+      id: "2"
+      author: Alena Iadkouskaya
+      changes:
+        - insert:
+            tableName: authorities
+            columns:
+              - column:
+                  name: role_id
+                  valueNumeric: 1
+              - column:
+                  name: role_name
+                  value: ROLE_USER
+        - insert:
+            tableName: authorities
+            columns:
+              - column:
+                  name: role_id
+                  valueNumeric: 2
+              - column:
+                  name: role_name
+                  value: ROLE_HR
+        - insert:
+            tableName: authorities
+            columns:
+              - column:
+                  name: role_id
+                  valueNumeric: 3
+              - column:
+                  name: role_name
+                  value: ROLE_MANAGER
+        - insert:
+            tableName: authorities
+            columns:
+              - column:
+                  name: role_id
+                  valueNumeric: 4
+              - column:
+                  name: role_name
+                  value: ROLE_ACCOUNTANT

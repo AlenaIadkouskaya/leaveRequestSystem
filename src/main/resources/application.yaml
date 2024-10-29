@@ -8,12 +8,7 @@ spring:
     username: <YOUR_NAME>
     password: <YOUR_PASSWORD>
     driver-class-name: org.postgresql.Driver
-    initialization-mode: always
-#  datasource:
-#    url: jdbc:h2:mem:mydb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-#    username: sa
-#    password:
-#    driverClassName: org.h2.Driver
+    initialization-mode: embedded
   h2:
     console:
       enabled: true
@@ -45,8 +40,15 @@ spring:
             token-uri: https://github.com/login/oauth/access_token
             user-info-uri: https://api.github.com/user
             user-name-attribute: id
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.yaml
 logging:
   level:
     org:
       springframework:
         security: DEBUG
+      hibernate:
+        SQL: DEBUG
+        type.descriptor.sql.BasicBinder: TRACE
+    root: info
+
