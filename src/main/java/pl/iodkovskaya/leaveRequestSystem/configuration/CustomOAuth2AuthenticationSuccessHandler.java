@@ -21,13 +21,11 @@ public class CustomOAuth2AuthenticationSuccessHandler implements AuthenticationS
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
 
-        String email = oAuth2User.getAttribute("email");
-        String name = oAuth2User.getAttribute("given_name");
-        String surname = oAuth2User.getAttribute("family_name");
+        String login = oAuth2User.getAttribute("login");
 
-        userService.registerOAuth2User(email, name, surname);
+        userService.registerOAuth2User(login);
 
-        response.sendRedirect("/pages/main.html");
+        response.sendRedirect("/");
 
     }
 

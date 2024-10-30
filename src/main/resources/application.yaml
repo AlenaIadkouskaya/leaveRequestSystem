@@ -50,5 +50,5 @@ logging:
       hibernate:
         SQL: DEBUG
         type.descriptor.sql.BasicBinder: TRACE
-    root: info
+    root: DEBUG
 

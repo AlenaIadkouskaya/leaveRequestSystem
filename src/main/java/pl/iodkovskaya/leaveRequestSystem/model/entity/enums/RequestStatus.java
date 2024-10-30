@@ -1,4 +1,4 @@
-package pl.iodkovskaya.leaveRequestSystem.model.enums;
+package pl.iodkovskaya.leaveRequestSystem.model.entity.enums;
 
 public enum RequestStatus {
     CREATED,
