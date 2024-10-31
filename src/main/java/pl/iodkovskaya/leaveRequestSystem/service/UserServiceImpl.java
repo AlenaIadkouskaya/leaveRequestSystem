@@ -29,6 +29,10 @@ public class UserServiceImpl implements UserService {
         } catch (RuntimeException e) {
 
         }
+    }
 
+    @Override
+    public UserEntity findUserByEmail(String email) {
+        return userRepository.findByEmail(email);
     }
 }

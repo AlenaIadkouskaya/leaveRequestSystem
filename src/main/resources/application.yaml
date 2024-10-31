@@ -50,5 +50,7 @@ logging:
       hibernate:
         SQL: DEBUG
         type.descriptor.sql.BasicBinder: TRACE
-    root: DEBUG
+#    root: DEBUG
+#spring.jpa.defer-datasource-initialization=true
+
 

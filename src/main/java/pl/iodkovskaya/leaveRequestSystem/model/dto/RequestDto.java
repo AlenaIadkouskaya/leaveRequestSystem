@@ -1,9 +1,12 @@
 package pl.iodkovskaya.leaveRequestSystem.model.dto;
 
+import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.FutureOrPresent;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import pl.iodkovskaya.leaveRequestSystem.model.entity.enums.RequestStatus;
 
 import java.time.LocalDate;
 
@@ -11,7 +14,13 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RequestDto {
-    //private Long employeeId;
-    private String startDate;
-    private String endDate;
+    @NotNull(message = "Start date must not be null.")
+    @FutureOrPresent(message = "Start date must be today or in the future")
+    private LocalDate startDate;
+    //    @NotNull
+//    @Future(message = "End date must be today or in the future")
+//    private LocalDate endDate;
+    @NotNull(message = "Duration of vacation must not be null.")
+    @Positive(message = "Duration of vacation must be greater than 0.")
+    private Integer durationVacation;
 }

@@ -1,6 +1,8 @@
 package pl.iodkovskaya.leaveRequestSystem.controller;
 
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
@@ -9,22 +11,18 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import pl.iodkovskaya.leaveRequestSystem.model.dto.RequestDto;
-import pl.iodkovskaya.leaveRequestSystem.model.dto.UserDto;
 import pl.iodkovskaya.leaveRequestSystem.service.RequestService;
-import pl.iodkovskaya.leaveRequestSystem.service.UserService;
 
 @AllArgsConstructor
 @RestController
-@RequestMapping("/api/users")
-public class UserController {
+@RequestMapping("/api/leave-requests")
+public class RequestController {
+    private final RequestService requestService;
 
-    private final UserService userService;
-
-
-
-    @PostMapping("/register")
-    public ResponseEntity<String> registerUser(@RequestBody UserDto userDto) {
-        userService.registerNewUser(userDto.getLogin(), userDto.getPassword(), userDto.getEmail());
-        return ResponseEntity.ok("User registered successfully");
+    @PostMapping("/new")
+    public ResponseEntity<String> createLeaveRequest(@AuthenticationPrincipal Object currentUser,
+                                                     @Valid @RequestBody RequestDto leaveRequestDto) {
+        requestService.createLeaveRequest(((User) currentUser).getUsername(), leaveRequestDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body("Leave request has been accepted.");
     }
 }
