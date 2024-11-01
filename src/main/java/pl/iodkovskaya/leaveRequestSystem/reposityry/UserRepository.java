@@ -7,4 +7,5 @@ import pl.iodkovskaya.leaveRequestSystem.model.entity.user.UserEntity;
 @Repository
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
     UserEntity findByEmail(String email);
+    UserEntity findByUserId(Long id);
 }

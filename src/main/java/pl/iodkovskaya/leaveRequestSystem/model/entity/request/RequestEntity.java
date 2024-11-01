@@ -42,10 +42,7 @@ public class RequestEntity {
     @PrePersist
     @PreUpdate
     public void validateDates() {
-//        if (endDate.isBefore(startDate)) {
-//            throw new IllegalArgumentException("End date cannot be before start date.");
-//        }
-        if (startDate == null||startDate.equals("")) {
+        if (startDate == null) {
             throw new NullPointerException("Start date can not be empty.");
         }
     }

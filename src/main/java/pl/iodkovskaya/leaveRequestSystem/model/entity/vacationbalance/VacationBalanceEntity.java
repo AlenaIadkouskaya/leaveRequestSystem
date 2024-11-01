@@ -26,4 +26,12 @@ public class VacationBalanceEntity {
 
     @Column(name = "remaining_days", nullable = false)
     private Integer remainingDays;
+
+    public VacationBalanceEntity(UserEntity employee, Integer year, Integer totalDays, Integer usedDays) {
+        this.employee = employee;
+        this.year = year;
+        this.totalDays = totalDays;
+        this.usedDays = usedDays;
+        this.remainingDays = totalDays - usedDays;
+    }
 }
