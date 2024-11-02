@@ -1,11 +1,13 @@
 package pl.iodkovskaya.leaveRequestSystem.controller;
 
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import pl.iodkovskaya.leaveRequestSystem.model.dto.MessageResponse;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.enums.ErrorCode;
 
@@ -14,18 +16,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 @ControllerAdvice
-public class RequestControllerAdvice {
+public class GlobalControllerAdvice {
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<MessageResponse> handleNotFoundException(EntityNotFoundException e) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new MessageResponse(e.getMessage(), ErrorCode.NOT_FOUND));
     }
-
-//    @ExceptionHandler(RuntimeException.class)
-//    public ResponseEntity<MessageResponse> handleLeaveRequestException(RuntimeException e) {
-//        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//                .body(new MessageResponse(e.getMessage(), ErrorCode.INTERNAL_SERVER_ERROR));
-//    }
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<MessageResponse> handleValidationDatesExceptions(IllegalArgumentException e) {
@@ -48,5 +44,13 @@ public class RequestControllerAdvice {
         ex.getBindingResult().getFieldErrors().forEach(error ->
                 errors.put(error.getField(), error.getDefaultMessage()));
         return ResponseEntity.badRequest().body(errors);
+    }
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<MessageResponse> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
+        MessageResponse response = new MessageResponse(
+                "Duplicate entry for employee and year. Each employee can have only one record per year.",
+                ErrorCode.DUPLICATE_ENTRY
+        );
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
 }

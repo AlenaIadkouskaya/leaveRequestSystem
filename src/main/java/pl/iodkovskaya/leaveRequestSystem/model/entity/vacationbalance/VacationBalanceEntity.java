@@ -4,7 +4,9 @@ import jakarta.persistence.*;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.user.UserEntity;
 
 @Entity
-@Table(name = "vacation_balances")
+@Table(name = "vacation_balances", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"user_id", "year"})
+})
 public class VacationBalanceEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,5 +35,9 @@ public class VacationBalanceEntity {
         this.totalDays = totalDays;
         this.usedDays = usedDays;
         this.remainingDays = totalDays - usedDays;
+    }
+
+    protected VacationBalanceEntity() {
+
     }
 }
