@@ -8,6 +8,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import pl.iodkovskaya.leaveRequestSystem.exception.InvalidOperationException;
 import pl.iodkovskaya.leaveRequestSystem.model.dto.MessageResponse;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.enums.ErrorCode;
 
@@ -28,16 +29,19 @@ public class GlobalControllerAdvice {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new MessageResponse(e.getMessage(), ErrorCode.DATE_PROBLEM));
     }
+
     @ExceptionHandler(DateTimeParseException.class)
-    public ResponseEntity<MessageResponse> handleValidationExistingExceptions(DateTimeParseException  e) {
+    public ResponseEntity<MessageResponse> handleValidationExistingExceptions(DateTimeParseException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new MessageResponse("Incorrect date.", ErrorCode.DATE_PROBLEM));
     }
+
     @ExceptionHandler(NullPointerException.class)
-    public ResponseEntity<MessageResponse> handleValidationEmptyInputDataExceptions(NullPointerException  e) {
+    public ResponseEntity<MessageResponse> handleValidationEmptyInputDataExceptions(NullPointerException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new MessageResponse(e.getMessage(), ErrorCode.DATE_PROBLEM));
     }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
@@ -45,6 +49,7 @@ public class GlobalControllerAdvice {
                 errors.put(error.getField(), error.getDefaultMessage()));
         return ResponseEntity.badRequest().body(errors);
     }
+
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<MessageResponse> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
         MessageResponse response = new MessageResponse(
@@ -52,5 +57,14 @@ public class GlobalControllerAdvice {
                 ErrorCode.DUPLICATE_ENTRY
         );
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
+    @ExceptionHandler(InvalidOperationException.class)
+    public ResponseEntity<MessageResponse> handleBusinessLogicException(InvalidOperationException ex) {
+        MessageResponse response = new MessageResponse(
+                ex.getMessage(),
+                ErrorCode.BUSINESS_LOGIC_ERROR
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 }

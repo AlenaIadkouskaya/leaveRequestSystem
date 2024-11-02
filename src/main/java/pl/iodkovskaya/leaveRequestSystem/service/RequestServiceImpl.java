@@ -3,6 +3,7 @@ package pl.iodkovskaya.leaveRequestSystem.service;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import pl.iodkovskaya.leaveRequestSystem.model.dto.RequestDto;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.enums.RequestStatus;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.request.RequestEntity;
@@ -16,8 +17,10 @@ import java.time.LocalDate;
 public class RequestServiceImpl implements RequestService {
     private final RequestRepository requestRepository;
     private final UserService userService;
+    private final VacationBalanceService vacationBalanceService;
 
     @Override
+    @Transactional
     public void createLeaveRequest(String userEmail, RequestDto leaveRequestDto) {
         UserEntity userByEmail = userService.findUserByEmail(userEmail);
         if (userByEmail == null) {
@@ -32,11 +35,16 @@ public class RequestServiceImpl implements RequestService {
                 RequestStatus.CREATED,
                 startVacation,
                 endVacation);
+
+        vacationBalanceService.checkRemainderForUser(userByEmail, leaveRequestDto.getDurationVacation());
+
         if (hasOverlappingRequests(newRequest)) {
-            throw new IllegalArgumentException("There is already a leave request for this period.");
+            throw new IllegalArgumentException("There is already a leave request for this period");
         }
+
         try {
             requestRepository.save(newRequest);
+            vacationBalanceService.updateRemainder(userByEmail, leaveRequestDto.getDurationVacation());
         } catch (Exception e) {
             throw new RuntimeException("Error saving leave request: " + e.getMessage(), e);
         }

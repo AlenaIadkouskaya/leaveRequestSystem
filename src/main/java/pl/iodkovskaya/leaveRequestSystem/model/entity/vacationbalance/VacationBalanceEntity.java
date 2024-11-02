@@ -1,12 +1,14 @@
 package pl.iodkovskaya.leaveRequestSystem.model.entity.vacationbalance;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.user.UserEntity;
 
 @Entity
 @Table(name = "vacation_balances", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"user_id", "year"})
+        @UniqueConstraint(columnNames = "user_id")
 })
+@Getter
 public class VacationBalanceEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -15,10 +17,10 @@ public class VacationBalanceEntity {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    private UserEntity employee;
+    private UserEntity user;
 
-    @Column(name = "year", nullable = false)
-    private Integer year;
+//    @Column(name = "year", nullable = false)
+//    private Integer year;
 
     @Column(name = "total_days", nullable = false)
     private Integer totalDays;
@@ -29,9 +31,8 @@ public class VacationBalanceEntity {
     @Column(name = "remaining_days", nullable = false)
     private Integer remainingDays;
 
-    public VacationBalanceEntity(UserEntity employee, Integer year, Integer totalDays, Integer usedDays) {
-        this.employee = employee;
-        this.year = year;
+    public VacationBalanceEntity(UserEntity employee, Integer totalDays, Integer usedDays) {
+        this.user = employee;
         this.totalDays = totalDays;
         this.usedDays = usedDays;
         this.remainingDays = totalDays - usedDays;
@@ -39,5 +40,14 @@ public class VacationBalanceEntity {
 
     protected VacationBalanceEntity() {
 
+    }
+
+    public void decreaseRemainingDays() {
+        this.remainingDays = this.totalDays - this.usedDays;
+    }
+
+    public void increaseUsedDays(Integer durationVacation) {
+        this.usedDays = this.usedDays + durationVacation;
+        decreaseRemainingDays();
     }
 }

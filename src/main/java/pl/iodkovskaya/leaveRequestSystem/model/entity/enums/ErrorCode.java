@@ -8,7 +8,9 @@ import lombok.Getter;
 public enum ErrorCode {
     NOT_FOUND(404, "Resource not found"),
     DATE_PROBLEM(400, "Invalid date range or date format"),
-    DUPLICATE_ENTRY(409, "Duplicate entry: record already exists");
+    DUPLICATE_ENTRY(409, "Duplicate entry: record already exists"),
+    BUSINESS_LOGIC_ERROR(400, "Business logic violation occurred");
+
     private final int code;
     private final String message;
 
