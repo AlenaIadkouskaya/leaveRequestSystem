@@ -91,7 +91,7 @@ public class RequestServiceTests {
         doNothing().when(vacationBalanceService).checkRemainderForUser(userEntity, leaveRequestDto.getDurationVacation());
 
         RequestEntity overlappingRequest = new RequestEntity(userEntity, RequestStatus.CREATED, LocalDate.now(), LocalDate.now().plusDays(5));
-        when(requestRepository.findAllByEmployeeAndDateRange(any(), any(), any())).thenReturn(List.of(overlappingRequest));
+        when(requestRepository.findAllByUserAndDateRange(any(), any(), any())).thenReturn(List.of(overlappingRequest));
 
         // when
         Executable e = () -> requestService.createLeaveRequest("test@example.com", leaveRequestDto);

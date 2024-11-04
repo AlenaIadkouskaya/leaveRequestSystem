@@ -11,6 +11,7 @@ import pl.iodkovskaya.leaveRequestSystem.model.entity.user.UserEntity;
 import pl.iodkovskaya.leaveRequestSystem.reposityry.RequestRepository;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Service
 @AllArgsConstructor
@@ -21,7 +22,7 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     @Transactional
-    public void createLeaveRequest(String userEmail, RequestDto leaveRequestDto) {
+    public UUID createLeaveRequest(String userEmail, RequestDto leaveRequestDto) {
         UserEntity userByEmail = userService.findUserByEmail(userEmail);
         if (userByEmail == null) {
             throw new EntityNotFoundException("User not found with email: " + userEmail);
@@ -43,8 +44,9 @@ public class RequestServiceImpl implements RequestService {
         }
 
         try {
-            requestRepository.save(newRequest);
+            RequestEntity savedRequest = requestRepository.save(newRequest);
             vacationBalanceService.updateRemainder(userByEmail, leaveRequestDto.getDurationVacation());
+            return savedRequest.getTechnicalId();
         } catch (Exception e) {
             throw new RuntimeException("Error saving leave request: " + e.getMessage(), e);
         }
@@ -52,8 +54,8 @@ public class RequestServiceImpl implements RequestService {
 
     private boolean hasOverlappingRequests(RequestEntity requestEntity) {
 
-        return requestRepository.findAllByEmployeeAndDateRange(
-                requestEntity.getEmployee(),
+        return requestRepository.findAllByUserAndDateRange(
+                requestEntity.getUser(),
                 requestEntity.getStartDate(),
                 requestEntity.getEndDate()).size() > 0;
     }

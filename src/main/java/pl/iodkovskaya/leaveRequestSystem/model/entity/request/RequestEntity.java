@@ -7,6 +7,7 @@ import pl.iodkovskaya.leaveRequestSystem.model.entity.enums.RequestStatus;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.user.UserEntity;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Entity
 @Table(name = "requests")
@@ -18,9 +19,12 @@ public class RequestEntity {
     @Column(name = "id")
     private Long id;
 
+    @Column(name = "technical_id", nullable = false, unique = true)
+    private UUID technicalId;
+
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    private UserEntity employee;
+    private UserEntity user;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
@@ -32,8 +36,9 @@ public class RequestEntity {
     @Column(name = "end_date", nullable = false)
     private LocalDate endDate;
 
-    public RequestEntity(UserEntity employee, RequestStatus status, LocalDate startDate, LocalDate endDate) {
-        this.employee = employee;
+    public RequestEntity(UserEntity user, RequestStatus status, LocalDate startDate, LocalDate endDate) {
+        this.technicalId = UUID.randomUUID();
+        this.user = user;
         this.status = status;
         this.startDate = startDate;
         this.endDate = endDate;

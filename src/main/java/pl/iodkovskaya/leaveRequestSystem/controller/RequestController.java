@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 import pl.iodkovskaya.leaveRequestSystem.model.dto.RequestDto;
 import pl.iodkovskaya.leaveRequestSystem.service.RequestService;
 
+import java.util.UUID;
+
 @AllArgsConstructor
 @RestController
 @RequestMapping("/api/leave-requests")
@@ -20,9 +22,12 @@ public class RequestController {
     private final RequestService requestService;
 
     @PostMapping("/new")
-    public ResponseEntity<String> createLeaveRequest(@AuthenticationPrincipal Object currentUser,
-                                                     @Valid @RequestBody RequestDto leaveRequestDto) {
-        requestService.createLeaveRequest(((User) currentUser).getUsername(), leaveRequestDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body("Leave request has been accepted.");
+    public ResponseEntity<UUID> createLeaveRequest(@AuthenticationPrincipal Object currentUser,
+                                                   @Valid @RequestBody RequestDto leaveRequestDto) {
+//        requestService.createLeaveRequest(((User) currentUser).getUsername(), leaveRequestDto);
+//        return ResponseEntity.status(HttpStatus.CREATED).body("Leave request has been accepted.");
+        UUID requestId = requestService.createLeaveRequest(((User) currentUser).getUsername(), leaveRequestDto);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(requestId);
     }
 }
