@@ -17,9 +17,9 @@ public class VacationBalanceServiceImpl implements VacationBalanceService {
 
     @Override
     public void addRecord(VacationBalanceDto vacationBalanceDto) {
-        UserEntity userById = userService.findUserById(vacationBalanceDto.getEmployeeId());
+        UserEntity userById = userService.findUserById(vacationBalanceDto.getUserId());
         if (userById == null) {
-            throw new EntityNotFoundException("User not found with ID: " + vacationBalanceDto.getEmployeeId());
+            throw new EntityNotFoundException("User not found with ID: " + vacationBalanceDto.getUserId());
         }
         VacationBalanceEntity vacationBalanceEntity = new VacationBalanceEntity(userById,
                 vacationBalanceDto.getTotalDays(),
@@ -30,10 +30,8 @@ public class VacationBalanceServiceImpl implements VacationBalanceService {
 
     @Override
     public void checkRemainderForUser(UserEntity user, Integer countDays) {
-        VacationBalanceEntity vacationBalance = vacationBalanceRepository.findByUser(user);
-        if (vacationBalance == null) {
-            throw new InvalidOperationException("No data on remaining vacation days");
-        }
+        VacationBalanceEntity vacationBalance = vacationBalanceRepository.findByUser(user)
+                .orElseThrow(() -> new InvalidOperationException("No data on remaining vacation days"));
         if (vacationBalance.getRemainingDays() < countDays) {
             throw new InvalidOperationException("Insufficient vacation days available. Your remainder: " + vacationBalance.getRemainingDays());
         }
@@ -41,7 +39,9 @@ public class VacationBalanceServiceImpl implements VacationBalanceService {
 
     @Override
     public void updateRemainder(UserEntity user, Integer durationVacation) {
-        VacationBalanceEntity vacationBalance = vacationBalanceRepository.findByUser(user);
+        VacationBalanceEntity vacationBalance = vacationBalanceRepository.findByUser(user)
+                .orElseThrow(() -> new InvalidOperationException("No data on remaining vacation days"));
         vacationBalance.increaseUsedDays(durationVacation);
     }
+
 }

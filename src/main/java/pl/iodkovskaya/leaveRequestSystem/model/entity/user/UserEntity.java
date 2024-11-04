@@ -50,6 +50,13 @@ public class UserEntity {
         this.enabled = enabled;
     }
 
+    public UserEntity(Long userId, String username, String passwordHash, String email) {
+        this.userId = userId;
+        this.username = username;
+        this.passwordHash = passwordHash;
+        this.email = email;
+    }
+
     public boolean isEnabled() {
         return enabled;
     }

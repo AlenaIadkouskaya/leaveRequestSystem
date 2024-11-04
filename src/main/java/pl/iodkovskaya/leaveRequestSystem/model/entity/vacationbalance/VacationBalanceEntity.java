@@ -1,6 +1,7 @@
 package pl.iodkovskaya.leaveRequestSystem.model.entity.vacationbalance;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.user.UserEntity;
 
@@ -9,6 +10,7 @@ import pl.iodkovskaya.leaveRequestSystem.model.entity.user.UserEntity;
         @UniqueConstraint(columnNames = "user_id")
 })
 @Getter
+@AllArgsConstructor
 public class VacationBalanceEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,9 +21,6 @@ public class VacationBalanceEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private UserEntity user;
 
-//    @Column(name = "year", nullable = false)
-//    private Integer year;
-
     @Column(name = "total_days", nullable = false)
     private Integer totalDays;
 
@@ -31,8 +30,8 @@ public class VacationBalanceEntity {
     @Column(name = "remaining_days", nullable = false)
     private Integer remainingDays;
 
-    public VacationBalanceEntity(UserEntity employee, Integer totalDays, Integer usedDays) {
-        this.user = employee;
+    public VacationBalanceEntity(UserEntity user, Integer totalDays, Integer usedDays) {
+        this.user = user;
         this.totalDays = totalDays;
         this.usedDays = usedDays;
         this.remainingDays = totalDays - usedDays;

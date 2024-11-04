@@ -5,7 +5,9 @@ import org.springframework.stereotype.Repository;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.user.UserEntity;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.vacationbalance.VacationBalanceEntity;
 
+import java.util.Optional;
+
 @Repository
 public interface VacationBalanceRepository extends JpaRepository<VacationBalanceEntity, Long> {
-    VacationBalanceEntity findByUser(UserEntity user);
+    Optional<VacationBalanceEntity> findByUser(UserEntity user);
 }
