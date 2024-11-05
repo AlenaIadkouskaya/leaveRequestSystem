@@ -4,10 +4,13 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.enums.RequestStatus;
+import pl.iodkovskaya.leaveRequestSystem.model.entity.role.RoleEntity;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.user.UserEntity;
 
 import java.time.LocalDate;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "requests")
@@ -36,6 +39,14 @@ public class RequestEntity {
     @Column(name = "end_date", nullable = false)
     private LocalDate endDate;
 
+    @ManyToMany
+    @JoinTable(
+            name = "request_approvers",
+            joinColumns = @JoinColumn(name = "request_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private Set<UserEntity> approvers;
+
     public RequestEntity(UserEntity user, RequestStatus status, LocalDate startDate, LocalDate endDate) {
         this.technicalId = UUID.randomUUID();
         this.user = user;
@@ -50,5 +61,31 @@ public class RequestEntity {
         if (startDate == null) {
             throw new NullPointerException("Start date can not be empty.");
         }
+    }
+
+    public void updateStatus(RequestStatus status) {
+        this.status = status;
+    }
+
+    public void approve(UserEntity approver) {
+        if (this.status == RequestStatus.REJECTED) {
+            return;
+        }
+        approvers.add(approver);
+        boolean hasAllApproves = approvers.stream()
+                .map(UserEntity::getRole)
+                .map(RoleEntity::getRoleName)
+                .collect(Collectors.toSet())
+                .containsAll(getListRequiredApprovalRoles());
+        if (hasAllApproves) {
+            updateStatus(RequestStatus.APPROVED);
+        } else if (!approvers.isEmpty()) {
+            updateStatus(RequestStatus.PENDING);
+        }
+
+    }
+
+    private static Set<String> getListRequiredApprovalRoles() {
+        return Set.of("ROLE_HR", "ROLE_MANAGER");
     }
 }

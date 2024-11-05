@@ -50,8 +50,7 @@ public class UserEntity {
         this.enabled = enabled;
     }
 
-    public UserEntity(Long userId, String username, String passwordHash, String email) {
-        this.userId = userId;
+    public UserEntity(String username, String passwordHash, String email) {
         this.username = username;
         this.passwordHash = passwordHash;
         this.email = email;
@@ -61,5 +60,7 @@ public class UserEntity {
         return enabled;
     }
 
-
+    //public boolean hasRole(String role) {
+//        return this.getRole().getRoleName().equals(role);
+//    }
 }

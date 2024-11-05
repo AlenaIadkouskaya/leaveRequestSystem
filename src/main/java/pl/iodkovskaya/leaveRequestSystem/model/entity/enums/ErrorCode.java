@@ -9,7 +9,9 @@ public enum ErrorCode {
     NOT_FOUND(404, "Resource not found"),
     DATE_PROBLEM(400, "Invalid date range or date format"),
     DUPLICATE_ENTRY(409, "Duplicate entry: record already exists"),
-    BUSINESS_LOGIC_ERROR(400, "Business logic violation occurred");
+    BUSINESS_LOGIC_ERROR(400, "Business logic violation occurred"),
+    ACCESS_DENIED(403, "Access denied: insufficient permissions"),
+    STATUS_CONFLICT(409, "Conflict with the current status");
 
     private final int code;
     private final String message;

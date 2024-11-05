@@ -32,7 +32,7 @@ public class VacationBalanceServiceTests {
 
     @BeforeEach
     void setUp() {
-        userEntity = new UserEntity(1L, "login", "1", "a@gmail.com");
+        userEntity = new UserEntity("login", "1", "a@gmail.com");
     }
 
     @Test

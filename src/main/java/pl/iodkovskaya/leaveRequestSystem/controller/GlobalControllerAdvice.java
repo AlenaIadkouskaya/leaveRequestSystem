@@ -9,9 +9,11 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import pl.iodkovskaya.leaveRequestSystem.exception.InvalidOperationException;
+import pl.iodkovskaya.leaveRequestSystem.exception.StatusException;
 import pl.iodkovskaya.leaveRequestSystem.model.dto.MessageResponse;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.enums.ErrorCode;
 
+import java.nio.file.AccessDeniedException;
 import java.time.format.DateTimeParseException;
 import java.util.HashMap;
 import java.util.Map;
@@ -67,4 +69,24 @@ public class GlobalControllerAdvice {
         );
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<MessageResponse> handleAccessDenied(AccessDeniedException ex) {
+        MessageResponse response = new MessageResponse(
+                ex.getMessage(),
+                ErrorCode.ACCESS_DENIED
+        );
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+    }
+    @ExceptionHandler(StatusException.class)
+    public ResponseEntity<MessageResponse> handleStatusConflict(StatusException ex) {
+
+        MessageResponse response = new MessageResponse(
+                ex.getMessage(),
+                ErrorCode.STATUS_CONFLICT
+        );
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
 }

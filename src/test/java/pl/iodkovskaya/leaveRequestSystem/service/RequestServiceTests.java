@@ -35,7 +35,7 @@ public class RequestServiceTests {
 
     @BeforeEach
     void setUp() {
-        userEntity = new UserEntity(1L, "login", "1", "test@example.com");
+        userEntity = new UserEntity("login", "1", "test@example.com");
 
         leaveRequestDto = new RequestDto(LocalDate.now(), 5);
     }
@@ -43,6 +43,7 @@ public class RequestServiceTests {
     @Test
     public void should_create_leave_request_successfully() {
         // given
+
         when(userService.findUserByEmail("test@example.com")).thenReturn(userEntity);
         when(requestRepository.save(any(RequestEntity.class))).thenReturn(new RequestEntity());
         doNothing().when(vacationBalanceService).checkRemainderForUser(userEntity, leaveRequestDto.getDurationVacation());
@@ -80,9 +81,6 @@ public class RequestServiceTests {
         // then
         assertThrows(InvalidOperationException.class, e);
     }
-//    Исключение при недостаточном количестве дней отпуска.
-//    Исключение при наличии перекрывающихся запросов на отпуск.
-//    Исключение при ошибке сохранения запроса на отпуск.
 
     @Test
     public void should_throw_exception_when_overlapping_requests() {
