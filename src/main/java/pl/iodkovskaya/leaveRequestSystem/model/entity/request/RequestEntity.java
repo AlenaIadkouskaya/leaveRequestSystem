@@ -3,11 +3,13 @@ package pl.iodkovskaya.leaveRequestSystem.model.entity.request;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import pl.iodkovskaya.leaveRequestSystem.exception.StatusException;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.enums.RequestStatus;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.role.RoleEntity;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.user.UserEntity;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -45,7 +47,7 @@ public class RequestEntity {
             joinColumns = @JoinColumn(name = "request_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
-    private Set<UserEntity> approvers;
+    private Set<UserEntity> approvers = new HashSet<>();
 
     public RequestEntity(UserEntity user, RequestStatus status, LocalDate startDate, LocalDate endDate) {
         this.technicalId = UUID.randomUUID();
@@ -53,6 +55,7 @@ public class RequestEntity {
         this.status = status;
         this.startDate = startDate;
         this.endDate = endDate;
+        this.approvers = new HashSet<>();
     }
 
     @PrePersist
@@ -64,12 +67,15 @@ public class RequestEntity {
     }
 
     public void updateStatus(RequestStatus status) {
+        if (status == null) {
+            throw new StatusException("Status is not correct");
+        }
         this.status = status;
     }
 
     public void approve(UserEntity approver) {
         if (this.status == RequestStatus.REJECTED) {
-            return;
+            throw new StatusException("This request is already rejected!");
         }
         approvers.add(approver);
         boolean hasAllApproves = approvers.stream()

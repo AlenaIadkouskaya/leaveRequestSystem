@@ -27,18 +27,12 @@ public class VacationBalanceServiceTests {
     private final VacationBalanceRepository vacationBalanceRepository = Mockito.mock(VacationBalanceRepository.class);
     @InjectMocks
     private VacationBalanceServiceImpl vacationBalanceService;
-    private VacationBalanceDto vacationBalanceDto;
-    private UserEntity userEntity;
-
-    @BeforeEach
-    void setUp() {
-        userEntity = new UserEntity("login", "1", "a@gmail.com");
-    }
 
     @Test
     public void should_create_vacation_balance_entity_with_success() {
         // given
-        vacationBalanceDto = new VacationBalanceDto(1L, 20, 5);
+        VacationBalanceDto vacationBalanceDto = new VacationBalanceDto(1L, 20, 5);
+        UserEntity userEntity = new UserEntity("login", "1", "a@gmail.com");
         when(userService.findUserById(vacationBalanceDto.getUserId())).thenReturn(userEntity);
         // when
         vacationBalanceService.addRecord(vacationBalanceDto);
@@ -54,7 +48,7 @@ public class VacationBalanceServiceTests {
     @Test
     public void should_throw_exception_when_user_not_found() {
         // given
-        vacationBalanceDto = new VacationBalanceDto(1L, 20, 5);
+        VacationBalanceDto vacationBalanceDto = new VacationBalanceDto(1L, 20, 5);
         when(userService.findUserById(vacationBalanceDto.getUserId())).thenReturn(null);
         // when
         Executable e = () -> vacationBalanceService.addRecord(vacationBalanceDto);
@@ -65,6 +59,7 @@ public class VacationBalanceServiceTests {
     @Test
     public void should_pass_check_when_remainder_for_user_has_sufficient_days() {
         // given
+        UserEntity userEntity = new UserEntity("login", "1", "a@gmail.com");
         VacationBalanceEntity vacationBalance = new VacationBalanceEntity(1L, userEntity, 10, 0, 10);
         when(vacationBalanceRepository.findByUser(userEntity)).thenReturn(Optional.of(vacationBalance));
 
@@ -78,6 +73,7 @@ public class VacationBalanceServiceTests {
     @Test
     public void should_throw_exception_when_remainder_for_user_less() {
         // given
+        UserEntity userEntity = new UserEntity("login", "1", "a@gmail.com");
         VacationBalanceEntity vacationBalance = new VacationBalanceEntity(1L, userEntity, 3, 0, 3);
         when(vacationBalanceRepository.findByUser(userEntity)).thenReturn(Optional.of(vacationBalance));
 
@@ -92,6 +88,7 @@ public class VacationBalanceServiceTests {
     @Test
     public void should_throw_exception_when_no_balance_data_available() {
         // given
+        UserEntity userEntity = new UserEntity("login", "1", "a@gmail.com");
         when(vacationBalanceRepository.findByUser(userEntity)).thenReturn(Optional.empty());
 
         // when
@@ -105,6 +102,7 @@ public class VacationBalanceServiceTests {
     @Test
     public void should_update_used_days_with_existing_balance() {
         // given
+        UserEntity userEntity = new UserEntity("login", "1", "a@gmail.com");
         VacationBalanceEntity vacationBalance = new VacationBalanceEntity(1L, userEntity, 10, 0, 10);
         when(vacationBalanceRepository.findByUser(userEntity)).thenReturn(Optional.of(vacationBalance));
 
@@ -120,6 +118,7 @@ public class VacationBalanceServiceTests {
     @Test
     public void should_throw_exception_before_updating_remainder_when_no_balance() {
         // given
+        UserEntity userEntity = new UserEntity("login", "1", "a@gmail.com");
         when(vacationBalanceRepository.findByUser(userEntity)).thenReturn(Optional.empty());
 
         // when

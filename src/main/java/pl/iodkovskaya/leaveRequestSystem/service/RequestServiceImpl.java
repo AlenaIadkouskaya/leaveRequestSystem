@@ -75,60 +75,15 @@ public class RequestServiceImpl implements RequestService {
         RequestEntity request = requestRepository.findByTechnicalId(technicalId)
                 .orElseThrow(() -> new EntityNotFoundException("Request not found with technical ID: " + technicalId));
 
-        //RequestStatus newStatus = getRequestStatusToUpdate(approver, request, approve);
-
-        //request.updateStatus(newStatus);
         request.approve(approver);
-        if (isRejectedOrCancelled(request.getStatus()))
-            updateVacationBalance(approver, request);
+//        if (isRejectedOrCancelled(request.getStatus()))
+//            updateVacationBalance(approver, request);
     }
-
-//    private static RequestStatus getRequestStatusToUpdate(UserEntity userByEmail, RequestEntity request, Boolean approve) throws AccessDeniedException {
-//
-//        if (request.getStatus() == RequestStatus.CANCELLED) {
-//            throw new StatusException("Request has Status " + request.getStatus().toString());
-//        }
-//
-//        if (userByEmail.hasRole("ROLE_USER")) {
-//            if (request.getStatus() == RequestStatus.CREATED) {
-//                return RequestStatus.CANCELLED;
-//            }
-//            throw new AccessDeniedException("User does not have permission to change status");
-//        }
-//
-//        if (userByEmail.hasRole("ROLE_MANAGER")) {
-//
-//            if (approve) {
-//                if (request.getStatus() != RequestStatus.APPROVED_BY_MANAGER) {
-//                    return RequestStatus.APPROVED_BY_MANAGER;
-//                }
-//            } else {
-//                if (request.getStatus() != RequestStatus.REJECTED_BY_MANAGER) {
-//                    return RequestStatus.REJECTED_BY_MANAGER;
-//                }
-//            }
-//            throw new StatusException("Request has Status " + request.getStatus().toString());
-//        }
-//        if (userByEmail.hasRole("ROLE_HR")) {
-//            if (approve) {
-//                if (request.getStatus() == RequestStatus.APPROVED_BY_MANAGER) {
-//                    return RequestStatus.APPROVED;
-//                }
-//            } else {
-//                if (request.getStatus() == RequestStatus.APPROVED) {
-//                    return RequestStatus.REJECTED_BY_HR;
-//                }
-//            }
-//            throw new StatusException("Request has Status " + request.getStatus().toString());
-//        }
-//
-//        throw new AccessDeniedException("User does not have permission to change status.");
-//
-//    }
 
     private boolean isRejectedOrCancelled(RequestStatus status) {
         return status == RequestStatus.REJECTED;
     }
+
     private void updateVacationBalance(UserEntity user, RequestEntity request) {
         int days = (int) ChronoUnit.DAYS.between(request.getStartDate(), request.getEndDate()) * -1;
         vacationBalanceService.updateRemainder(user, days);

@@ -22,4 +22,9 @@ public class RoleEntity {
 
     @OneToMany(mappedBy = "role")
     private Set<UserEntity> users;
+
+    public RoleEntity(String roleName, Set<UserEntity> users) {
+        this.roleName = roleName;
+        this.users = users;
+    }
 }

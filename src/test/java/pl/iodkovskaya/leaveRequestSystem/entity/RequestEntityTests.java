@@ -2,11 +2,14 @@ package pl.iodkovskaya.leaveRequestSystem.entity;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
+import pl.iodkovskaya.leaveRequestSystem.exception.StatusException;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.enums.RequestStatus;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.request.RequestEntity;
+import pl.iodkovskaya.leaveRequestSystem.model.entity.role.RoleEntity;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.user.UserEntity;
 
 import java.time.LocalDate;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -30,4 +33,72 @@ public class RequestEntityTests {
         assertThrows(NullPointerException.class, executable);
     }
 
+    @Test
+    void should_update_status_to_approved_when_all_roles_approve() {
+        // given
+        RequestEntity request = new RequestEntity();
+        UserEntity approver1 = new UserEntity("", "", "", "", "", new RoleEntity("ROLE_HR", Set.of()), true);
+        UserEntity approver2 = new UserEntity("", "", "", "", "", new RoleEntity("ROLE_MANAGER", Set.of()), true);
+
+        // when
+        request.approve(approver1);
+        request.approve(approver2);
+        // then
+        assertThat(request.getStatus()).isEqualTo(RequestStatus.APPROVED);
+        assertThat(request.getApprovers().size()).isEqualTo(2);
+    }
+
+    @Test
+    void should_update_status_to_pending_when_only_one_role_approve() {
+        // given
+        RequestEntity request = new RequestEntity();
+        UserEntity approver1 = new UserEntity("", "", "", "", "", new RoleEntity("ROLE_HR", Set.of()), true);
+
+        // when
+        request.approve(approver1);
+
+        // then
+        assertThat(request.getStatus()).isEqualTo(RequestStatus.PENDING);
+        assertThat(request.getApprovers().size()).isEqualTo(1);
+    }
+
+    @Test
+    void should_throw_status_exception_when_status_is_rejected() {
+        // given
+        RequestEntity request = new RequestEntity();
+        request.updateStatus(RequestStatus.REJECTED);
+        UserEntity approver1 = new UserEntity("", "", "", "", "", new RoleEntity("ROLE_HR", Set.of()), true);
+
+        // when
+        Executable e = () -> request.approve(approver1);
+
+        // then
+        assertThrows(StatusException.class, e);
+        assertThat(request.getApprovers().size()).isEqualTo(0);
+    }
+
+    @Test
+    void should_update_status_when_it_is_correct() {
+        // given
+        RequestEntity request = new RequestEntity();
+        RequestStatus newStatus = RequestStatus.APPROVED;
+
+        // when
+        request.updateStatus(newStatus);
+
+        // then
+        assertThat(request.getStatus()).isEqualTo(newStatus);
+    }
+
+    @Test
+    void should_throw_exception_when_status_is_null() {
+        // given
+        RequestEntity request = new RequestEntity();
+
+        // when
+        Executable e = () -> request.updateStatus(null);
+
+        // then
+        assertThrows(StatusException.class, e);
+    }
 }
