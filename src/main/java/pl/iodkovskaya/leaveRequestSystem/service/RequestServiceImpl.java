@@ -4,15 +4,12 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import pl.iodkovskaya.leaveRequestSystem.exception.StatusException;
-//import pl.iodkovskaya.leaveRequestSystem.model.dto.ChangeStatusDto;
 import pl.iodkovskaya.leaveRequestSystem.model.dto.RequestDto;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.enums.RequestStatus;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.request.RequestEntity;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.user.UserEntity;
 import pl.iodkovskaya.leaveRequestSystem.reposityry.RequestRepository;
 
-import java.nio.file.AccessDeniedException;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.UUID;

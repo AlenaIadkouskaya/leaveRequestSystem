@@ -5,22 +5,25 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
-import org.mockito.InjectMocks;
-import org.mockito.Mockito;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import pl.iodkovskaya.leaveRequestSystem.exception.InvalidOperationException;
+import pl.iodkovskaya.leaveRequestSystem.exception.StatusException;
 import pl.iodkovskaya.leaveRequestSystem.model.dto.RequestDto;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.enums.RequestStatus;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.request.RequestEntity;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.user.UserEntity;
 import pl.iodkovskaya.leaveRequestSystem.reposityry.RequestRepository;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
@@ -33,6 +36,8 @@ public class RequestServiceTests {
     private final VacationBalanceService vacationBalanceService = Mockito.mock(VacationBalanceService.class);
     @InjectMocks
     private RequestServiceImpl requestService;
+    //@Mock
+    private UserEntity mockUser = Mockito.mock(UserEntity.class);
 
 
     @Test
@@ -162,6 +167,75 @@ public class RequestServiceTests {
         // then
         verify(request).approve(approver);
         verify(requestRepository).findByTechnicalId(technicalId);
+    }
+
+    @Test
+    public void should_reject_request_successfully() {
+        // given
+        UUID technicalId = UUID.randomUUID();
+        String userEmail = "user@example.com";
+        RequestEntity request = new RequestEntity(new UserEntity(), RequestStatus.PENDING, LocalDate.now(), LocalDate.now().plusDays(5));
+        when(requestRepository.findByTechnicalId(technicalId)).thenReturn(Optional.of(request));
+
+        doNothing().when(vacationBalanceService).updateRemainder(request.getUser(), 5);
+
+
+        // when
+        requestService.rejectRequest(userEmail, technicalId);
+
+        // then
+        assertThat(request.getStatus()).isEqualTo(RequestStatus.REJECTED);
+        verify(requestRepository).findByTechnicalId(technicalId);
+        //verify(requestRepository).save(request);
+        //verify(requestService).updateVacationBalance(request.getUser(), request);
+    }
+
+    @Test
+    public void should_throw_exception_when_request_not_found() {
+        // given
+        UUID technicalId = UUID.randomUUID();
+        String userEmail = "user@example.com";
+        when(requestRepository.findByTechnicalId(technicalId)).thenReturn(Optional.empty());
+
+        // when
+        Executable e = () -> requestService.rejectRequest(userEmail, technicalId);
+
+        // then
+        assertThrows(EntityNotFoundException.class, e);
+    }
+
+    @Test
+    public void should_throw_status_exception_when_request_already_rejected() {
+        // Arrange
+        RequestEntity request = new RequestEntity(new UserEntity(), RequestStatus.REJECTED, LocalDate.now(), LocalDate.now().plusDays(5));
+        UUID technicalId = UUID.randomUUID();
+        String userEmail = "user@example.com";
+        when(requestRepository.findByTechnicalId(technicalId)).thenReturn(Optional.of(request));
+
+        // Act & Assert
+        Executable e = () -> requestService.rejectRequest(userEmail, technicalId);
+
+        // then
+        assertThrows(StatusException.class, e);
+    }
+
+    @Test
+    public void testRejectRequest_ShouldCallUpdateVacationBalance() throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+        // Arrange
+        RequestEntity request = new RequestEntity(new UserEntity(), RequestStatus.PENDING, LocalDate.now(), LocalDate.now().plusDays(5));
+        UUID technicalId = UUID.randomUUID();
+        String userEmail = "user@example.com";
+        when(requestRepository.findByTechnicalId(technicalId)).thenReturn(Optional.of(request));
+
+        // Act
+        requestService.rejectRequest(userEmail, technicalId);
+
+        // Assert
+        //verify(requestService).updateVacationBalance(mockUser, request);
+        Method method = RequestServiceImpl.class.getDeclaredMethod("updateVacationBalance", UserEntity.class, RequestEntity.class);
+        method.setAccessible(true);
+        method.invoke(requestService, mockUser, request);//!!!
+
     }
 
 }

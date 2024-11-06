@@ -43,6 +43,7 @@ public class RequestEntityTests {
         // when
         request.approve(approver1);
         request.approve(approver2);
+
         // then
         assertThat(request.getStatus()).isEqualTo(RequestStatus.APPROVED);
         assertThat(request.getApprovers().size()).isEqualTo(2);
@@ -101,4 +102,46 @@ public class RequestEntityTests {
         // then
         assertThrows(StatusException.class, e);
     }
+
+    @Test
+    public void should_set_status_reject() {
+        // given
+        RequestEntity request = new RequestEntity(new UserEntity(), RequestStatus.CREATED, LocalDate.now(), LocalDate.now().plusDays(5));
+
+        // when
+        request.reject();
+
+        // then
+        assertThat(request.getStatus()).isEqualTo(RequestStatus.REJECTED);
+        assertThat(request.getApprovers().size()).isEqualTo(0);
+    }
+
+    @Test
+    public void should_clear_approvers_when_status_changed_to_reject() {
+        // given
+        RequestEntity request = new RequestEntity(new UserEntity(), RequestStatus.PENDING, LocalDate.now(), LocalDate.now().plusDays(5));
+        UserEntity approver = new UserEntity("", "", "", "", "", new RoleEntity("ROLE_HR", Set.of()), true);
+        request.approve(approver);
+
+        // when
+        request.reject();
+
+        // then
+        assertThat(request.getStatus()).isEqualTo(RequestStatus.REJECTED);
+        assertThat(request.getApprovers().size()).isEqualTo(0);
+    }
+
+    @Test
+    public void should_throw_status_exception_when_already_request_rejected() {
+        // given
+        RequestEntity request = new RequestEntity(new UserEntity(), RequestStatus.PENDING, LocalDate.now(), LocalDate.now().plusDays(5));
+        request.reject();
+
+        // when
+        Executable e = () -> request.reject();
+
+        // then
+        assertThrows(StatusException.class, e);
+    }
+
 }
