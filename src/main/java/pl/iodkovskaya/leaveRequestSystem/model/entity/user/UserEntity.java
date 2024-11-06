@@ -60,7 +60,8 @@ public class UserEntity {
         return enabled;
     }
 
-    //public boolean hasRole(String role) {
-//        return this.getRole().getRoleName().equals(role);
-//    }
+    @Override
+    public String toString() {
+        return lastName + " " + firstName;
+    }
 }

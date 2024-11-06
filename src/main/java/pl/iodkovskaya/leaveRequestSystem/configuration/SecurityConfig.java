@@ -37,7 +37,7 @@ public class SecurityConfig {
 //                        .requestMatchers("/api/accountant").hasRole("ACCOUNTANT")
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/", "/login**").permitAll()
-                        .requestMatchers("/api/users/**").hasRole("USER")
+                        //.requestMatchers("/api/users/**").hasRole("USER")
                         .requestMatchers("/api/users/register").permitAll()
                         //.requestMatchers("/api/users/**").permitAll()
                         .requestMatchers("/api/leave-requests/**").permitAll()

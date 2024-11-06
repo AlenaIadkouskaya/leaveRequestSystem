@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import pl.iodkovskaya.leaveRequestSystem.model.dto.UserDto;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.user.UserEntity;
 import pl.iodkovskaya.leaveRequestSystem.reposityry.UserRepository;
 
@@ -20,11 +21,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void registerNewUser(String login, String password, String email) {
+    public void registerNewUser(UserDto user) {
         try {
-            userRepository.save(new UserEntity(login,
-                    passwordEncoder.encode(password),
-                    "", "", email,
+            userRepository.save(new UserEntity(user.getLogin(),
+                    passwordEncoder.encode(user.getPassword()),
+                    user.getFirstName(), user.getLastName(), user.getEmail(),
                     roleService.findRoleByName("ROLE_USER"), true));
         } catch (RuntimeException e) {
 

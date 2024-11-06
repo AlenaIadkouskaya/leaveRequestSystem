@@ -20,11 +20,9 @@ public class UserController {
 
     private final UserService userService;
 
-
-
     @PostMapping("/register")
     public ResponseEntity<String> registerUser(@RequestBody UserDto userDto) {
-        userService.registerNewUser(userDto.getLogin(), userDto.getPassword(), userDto.getEmail());
+        userService.registerNewUser(userDto);
         return ResponseEntity.ok("User registered successfully");
     }
 }

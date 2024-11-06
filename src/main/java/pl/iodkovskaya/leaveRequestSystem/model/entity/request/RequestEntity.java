@@ -3,6 +3,7 @@ package pl.iodkovskaya.leaveRequestSystem.model.entity.request;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.web.bind.annotation.GetMapping;
 import pl.iodkovskaya.leaveRequestSystem.exception.StatusException;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.enums.RequestStatus;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.role.RoleEntity;
@@ -10,6 +11,7 @@ import pl.iodkovskaya.leaveRequestSystem.model.entity.user.UserEntity;
 
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -90,11 +92,13 @@ public class RequestEntity {
         }
 
     }
+
     public void reject() {
         ensureRequestNotRejected();
         updateStatus(RequestStatus.REJECTED);
         approvers.clear();
     }
+
     private void ensureRequestNotRejected() {
         if (this.status == RequestStatus.REJECTED) {
             throw new StatusException("This request is already rejected!");
@@ -104,6 +108,7 @@ public class RequestEntity {
     private static Set<String> getListRequiredApprovalRoles() {
         return Set.of("ROLE_HR", "ROLE_MANAGER");
     }
+
     private boolean isFullyApproved() {
         Set<String> requiredRoles = getListRequiredApprovalRoles();
         Set<String> approverRoles = approvers.stream()
@@ -112,4 +117,6 @@ public class RequestEntity {
                 .collect(Collectors.toSet());
         return approverRoles.containsAll(requiredRoles);
     }
+
+
 }

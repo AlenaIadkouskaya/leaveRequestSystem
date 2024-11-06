@@ -4,7 +4,9 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import pl.iodkovskaya.leaveRequestSystem.mapper.RequestMapper;
 import pl.iodkovskaya.leaveRequestSystem.model.dto.RequestDto;
+import pl.iodkovskaya.leaveRequestSystem.model.dto.RequestResponseDto;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.enums.RequestStatus;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.request.RequestEntity;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.user.UserEntity;
@@ -12,6 +14,7 @@ import pl.iodkovskaya.leaveRequestSystem.reposityry.RequestRepository;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -20,6 +23,7 @@ public class RequestServiceImpl implements RequestService {
     private final RequestRepository requestRepository;
     private final UserService userService;
     private final VacationBalanceService vacationBalanceService;
+    private final RequestMapper requestMapper;
 
     @Override
     @Transactional
@@ -53,14 +57,6 @@ public class RequestServiceImpl implements RequestService {
         }
     }
 
-    private boolean hasOverlappingRequests(RequestEntity requestEntity) {
-
-        return requestRepository.findAllByUserAndDateRange(
-                requestEntity.getUser(),
-                requestEntity.getStartDate(),
-                requestEntity.getEndDate()).size() > 0;
-    }
-
     @Override
     @Transactional
     public void approveRequest(String userEmail, UUID technicalId) {
@@ -75,12 +71,6 @@ public class RequestServiceImpl implements RequestService {
         request.approve(approver);
     }
 
-
-    private void updateVacationBalance(UserEntity user, RequestEntity request) {
-        int days = (int) ChronoUnit.DAYS.between(request.getStartDate(), request.getEndDate()) * (-1) + 1;
-        vacationBalanceService.updateRemainder(user, days);
-    }
-
     @Override
     @Transactional
     public void rejectRequest(String userEmail, UUID technicalId) {
@@ -89,5 +79,30 @@ public class RequestServiceImpl implements RequestService {
 
         request.reject();
         updateVacationBalance(request.getUser(), request);
+    }
+
+    @Override
+    public List<RequestResponseDto> getAllRequests() {
+        return requestRepository.findAll().stream().map(e -> requestMapper.fromEntity(e)).toList();
+    }
+
+    private boolean hasOverlappingRequests(RequestEntity requestEntity) {
+
+        return requestRepository.findAllByUserAndDateRange(
+                requestEntity.getUser(),
+                requestEntity.getStartDate(),
+                requestEntity.getEndDate()).size() > 0;
+    }
+
+    private void updateVacationBalance(UserEntity user, RequestEntity request) {
+        int days = (int) (ChronoUnit.DAYS.between(request.getStartDate(), request.getEndDate()) + 1) * (-1);
+        vacationBalanceService.updateRemainder(user, days);
+    }
+
+    @Override
+    public RequestResponseDto getRequestById(UUID id) {
+        RequestEntity request = requestRepository.findByTechnicalId(id)
+                .orElseThrow(() -> new EntityNotFoundException("Request not found with technical ID: " + id));
+        return requestMapper.fromEntity(request);
     }
 }
