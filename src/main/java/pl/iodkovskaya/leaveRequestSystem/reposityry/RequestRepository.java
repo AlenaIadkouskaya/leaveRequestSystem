@@ -24,5 +24,6 @@ public interface RequestRepository extends JpaRepository<RequestEntity, Long> {
             @Param("endDate") LocalDate endDate);
 
     Optional<RequestEntity> findByTechnicalId(UUID technicalId);
+    List<RequestEntity> findByUser(UserEntity userId);
 
 }

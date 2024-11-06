@@ -1,12 +1,13 @@
 package pl.iodkovskaya.leaveRequestSystem.service;
 
 import lombok.AllArgsConstructor;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import pl.iodkovskaya.leaveRequestSystem.model.dto.UserDto;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.user.UserEntity;
 import pl.iodkovskaya.leaveRequestSystem.reposityry.UserRepository;
+
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor

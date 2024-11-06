@@ -16,6 +16,8 @@ import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.UUID;
 
+import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
+
 @AllArgsConstructor
 @RestController
 @RequestMapping("/api/leave-requests")
@@ -48,11 +50,18 @@ public class RequestController {
     public List<RequestResponseDto> getAllRequests() {
         return requestService.getAllRequests();
     }
+
     @GetMapping("{id}")
     public ResponseEntity<RequestResponseDto> getRequestById(@PathVariable("id") UUID id) {
         RequestResponseDto responseDto = requestService.getRequestById(id);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+    }
+
+    @GetMapping("/all-for-user")
+    public List<RequestResponseDto> getAllRequestsByUserId(@AuthenticationPrincipal Object currentUser) {
+        String username = ((User) currentUser).getUsername();
+        return requestService.getRequestsByUser(username);
     }
 
 }

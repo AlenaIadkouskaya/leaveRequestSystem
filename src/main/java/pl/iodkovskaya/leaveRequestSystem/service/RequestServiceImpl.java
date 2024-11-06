@@ -16,6 +16,7 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -28,10 +29,7 @@ public class RequestServiceImpl implements RequestService {
     @Override
     @Transactional
     public UUID createLeaveRequest(String userEmail, RequestDto leaveRequestDto) {
-        UserEntity userByEmail = userService.findUserByEmail(userEmail);
-        if (userByEmail == null) {
-            throw new EntityNotFoundException("User not found with email: " + userEmail);
-        }
+        UserEntity userByEmail = findUserByEmailOrThrow(userEmail);
         LocalDate startVacation = leaveRequestDto.getStartDate();
         LocalDate endVacation = leaveRequestDto.getStartDate().plusDays(leaveRequestDto.getDurationVacation() - 1);
 
@@ -60,10 +58,7 @@ public class RequestServiceImpl implements RequestService {
     @Override
     @Transactional
     public void approveRequest(String userEmail, UUID technicalId) {
-        UserEntity approver = userService.findUserByEmail(userEmail);
-        if (approver == null) {
-            throw new EntityNotFoundException("User not found with email: " + userEmail);
-        }
+        UserEntity approver = findUserByEmailOrThrow(userEmail);
 
         RequestEntity request = requestRepository.findByTechnicalId(technicalId)
                 .orElseThrow(() -> new EntityNotFoundException("Request not found with technical ID: " + technicalId));
@@ -99,10 +94,33 @@ public class RequestServiceImpl implements RequestService {
         vacationBalanceService.updateRemainder(user, days);
     }
 
+    //    @Override
+//    public RequestResponseDto getRequestById(UUID id) {
+//        RequestEntity request = requestRepository.findByTechnicalId(id)
+//                .orElseThrow(() -> new EntityNotFoundException("Request not found with technical ID: " + id));
+//        return requestMapper.fromEntity(request);
+//    }
     @Override
     public RequestResponseDto getRequestById(UUID id) {
-        RequestEntity request = requestRepository.findByTechnicalId(id)
+        return requestRepository.findByTechnicalId(id)
+                .map(requestMapper::fromEntity)
                 .orElseThrow(() -> new EntityNotFoundException("Request not found with technical ID: " + id));
-        return requestMapper.fromEntity(request);
+    }
+
+    @Override
+    public List<RequestResponseDto> getRequestsByUser(String username) {
+        UserEntity user = findUserByEmailOrThrow(username);
+        List<RequestEntity> requests = requestRepository.findByUser(user);
+        return requests.stream()
+                .map(requestMapper::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    private UserEntity findUserByEmailOrThrow(String email) {
+        UserEntity user = userService.findUserByEmail(email);
+        if (user == null) {
+            throw new EntityNotFoundException("User not found with email: " + email);
+        }
+        return user;
     }
 }

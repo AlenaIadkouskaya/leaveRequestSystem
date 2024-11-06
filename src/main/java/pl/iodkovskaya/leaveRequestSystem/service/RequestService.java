@@ -14,4 +14,5 @@ public interface RequestService {
     void rejectRequest(String userEmail, UUID technicalId) throws AccessDeniedException;
     List<RequestResponseDto> getAllRequests();
     RequestResponseDto getRequestById(UUID id);
+    List<RequestResponseDto> getRequestsByUser(String userEmail);
 }
