@@ -62,36 +62,54 @@ public class RequestEntity {
     @PreUpdate
     public void validateDates() {
         if (startDate == null) {
-            throw new NullPointerException("Start date can not be empty.");
+            throw new NullPointerException("Start date can not be empty");
+        }
+        if (endDate == null) {
+            throw new NullPointerException("End date cannot be null");
+        }
+        if (endDate.isBefore(startDate)) {
+            throw new IllegalArgumentException("End date cannot be before start date");
         }
     }
 
     public void updateStatus(RequestStatus status) {
         if (status == null) {
-            throw new StatusException("Status is not correct");
+            throw new StatusException("Status cannot be empty");
         }
         this.status = status;
     }
 
     public void approve(UserEntity approver) {
-        if (this.status == RequestStatus.REJECTED) {
-            throw new StatusException("This request is already rejected!");
-        }
+        ensureRequestNotRejected();
         approvers.add(approver);
-        boolean hasAllApproves = approvers.stream()
-                .map(UserEntity::getRole)
-                .map(RoleEntity::getRoleName)
-                .collect(Collectors.toSet())
-                .containsAll(getListRequiredApprovalRoles());
-        if (hasAllApproves) {
+
+        if (isFullyApproved()) {
             updateStatus(RequestStatus.APPROVED);
         } else if (!approvers.isEmpty()) {
             updateStatus(RequestStatus.PENDING);
         }
 
     }
+    public void reject() {
+        ensureRequestNotRejected();
+        updateStatus(RequestStatus.REJECTED);
+        approvers.clear();
+    }
+    private void ensureRequestNotRejected() {
+        if (this.status == RequestStatus.REJECTED) {
+            throw new StatusException("This request is already rejected!");
+        }
+    }
 
     private static Set<String> getListRequiredApprovalRoles() {
         return Set.of("ROLE_HR", "ROLE_MANAGER");
+    }
+    private boolean isFullyApproved() {
+        Set<String> requiredRoles = getListRequiredApprovalRoles();
+        Set<String> approverRoles = approvers.stream()
+                .map(UserEntity::getRole)
+                .map(RoleEntity::getRoleName)
+                .collect(Collectors.toSet());
+        return approverRoles.containsAll(requiredRoles);
     }
 }

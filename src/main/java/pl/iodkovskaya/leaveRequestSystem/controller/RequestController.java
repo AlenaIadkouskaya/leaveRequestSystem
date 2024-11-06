@@ -32,6 +32,12 @@ public class RequestController {
     public ResponseEntity<String> approveRequest(@AuthenticationPrincipal Object currentUser,
                                                  @RequestParam UUID technicalId) throws AccessDeniedException {
         requestService.approveRequest(((User) currentUser).getUsername(), technicalId);
-        return ResponseEntity.status(HttpStatus.OK).body("Request has been approved.");
+        return ResponseEntity.status(HttpStatus.OK).body("Request has been approved");
+    }
+    @PatchMapping("/reject")
+    public ResponseEntity<String> rejectRequest(@AuthenticationPrincipal Object currentUser,
+                                                 @RequestParam UUID technicalId) throws AccessDeniedException {
+        requestService.rejectRequest(((User) currentUser).getUsername(), technicalId);
+        return ResponseEntity.status(HttpStatus.OK).body("Request has been rejected");
     }
 }

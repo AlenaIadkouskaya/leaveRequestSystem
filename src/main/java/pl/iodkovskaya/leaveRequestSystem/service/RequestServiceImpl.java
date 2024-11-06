@@ -32,7 +32,7 @@ public class RequestServiceImpl implements RequestService {
             throw new EntityNotFoundException("User not found with email: " + userEmail);
         }
         LocalDate startVacation = leaveRequestDto.getStartDate();
-        LocalDate endVacation = leaveRequestDto.getStartDate().plusDays(leaveRequestDto.getDurationVacation() + 1);
+        LocalDate endVacation = leaveRequestDto.getStartDate().plusDays(leaveRequestDto.getDurationVacation() - 1);
 
 
         RequestEntity newRequest = new RequestEntity(
@@ -66,7 +66,7 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     @Transactional
-    public void approveRequest(String userEmail, UUID technicalId) throws AccessDeniedException {
+    public void approveRequest(String userEmail, UUID technicalId) {
         UserEntity approver = userService.findUserByEmail(userEmail);
         if (approver == null) {
             throw new EntityNotFoundException("User not found with email: " + userEmail);
@@ -76,16 +76,21 @@ public class RequestServiceImpl implements RequestService {
                 .orElseThrow(() -> new EntityNotFoundException("Request not found with technical ID: " + technicalId));
 
         request.approve(approver);
-//        if (isRejectedOrCancelled(request.getStatus()))
-//            updateVacationBalance(approver, request);
     }
 
-    private boolean isRejectedOrCancelled(RequestStatus status) {
-        return status == RequestStatus.REJECTED;
-    }
 
     private void updateVacationBalance(UserEntity user, RequestEntity request) {
-        int days = (int) ChronoUnit.DAYS.between(request.getStartDate(), request.getEndDate()) * -1;
+        int days = (int) ChronoUnit.DAYS.between(request.getStartDate(), request.getEndDate()) * (-1) + 1;
         vacationBalanceService.updateRemainder(user, days);
+    }
+
+    @Override
+    @Transactional
+    public void rejectRequest(String userEmail, UUID technicalId) {
+        RequestEntity request = requestRepository.findByTechnicalId(technicalId)
+                .orElseThrow(() -> new EntityNotFoundException("Request not found with technical ID: " + technicalId));
+
+        request.reject();
+        updateVacationBalance(request.getUser(), request);
     }
 }
