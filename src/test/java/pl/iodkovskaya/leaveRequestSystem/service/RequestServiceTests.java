@@ -4,7 +4,8 @@ import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
-import org.mockito.*;
+import org.mockito.InjectMocks;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import pl.iodkovskaya.leaveRequestSystem.exception.InvalidOperationException;
 import pl.iodkovskaya.leaveRequestSystem.exception.StatusException;
@@ -20,6 +21,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -39,8 +41,8 @@ public class RequestServiceTests {
     private final VacationBalanceService vacationBalanceService = Mockito.mock(VacationBalanceService.class);
     @InjectMocks
     private RequestServiceImpl requestService;
-    //@Mock
-    private UserEntity mockUser = Mockito.mock(UserEntity.class);
+
+    private final UserEntity mockUser = Mockito.mock(UserEntity.class);
 
 
     @Test
@@ -296,4 +298,56 @@ public class RequestServiceTests {
         assertThrows(EntityNotFoundException.class, e);
     }
 
+    @Test
+    public void should_find_all_requests_for_logged_in_user() {
+        // given
+        RequestEntity request = new RequestEntity();
+        RequestResponseDto requestResponse = new RequestResponseDto();
+        when(userService.findUserByEmail("test@example.com")).thenReturn(mockUser);
+        when(requestRepository.findByUser(mockUser)).thenReturn(List.of(request));
+        when(requestMapper.fromEntity(request)).thenReturn(requestResponse);
+
+        // when
+        List<RequestResponseDto> result = requestService.getRequestsByUser("test@example.com");
+
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result.size()).isEqualTo(1);
+        assertThat(result.get(0)).isEqualTo(requestResponse);
+        verify(userService, times(1)).findUserByEmail("test@example.com");
+        verify(requestRepository, times(1)).findByUser(mockUser);
+        verify(requestMapper, times(1)).fromEntity(request);
+    }
+
+    @Test
+    public void should_throw_exception_when_user_not_found_while_fetching_requests() {
+        // given
+        when(userService.findUserByEmail("notfound@example.com")).thenReturn(null);
+
+        // when
+        Executable e = () -> requestService.getRequestsByUser("notfound@example.com");
+
+        // then
+        assertThrows(EntityNotFoundException.class, e);
+        verify(userService, times(1)).findUserByEmail("notfound@example.com");
+        verify(requestRepository, never()).findByUser(any());
+        verify(requestMapper, never()).fromEntity(any());
+    }
+
+    @Test
+    public void should_return_empty_list_requests_when_for_user_not_exists_one() {
+        // given
+        when(userService.findUserByEmail("test@example.com")).thenReturn(mockUser);
+        when(requestRepository.findByUser(mockUser)).thenReturn(Collections.emptyList());
+
+        // when
+        List<RequestResponseDto> result = requestService.getRequestsByUser("test@example.com");
+
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result).isEmpty();
+        verify(userService, times(1)).findUserByEmail("test@example.com");
+        verify(requestRepository, times(1)).findByUser(mockUser);
+        verify(requestMapper, never()).fromEntity(any());
+    }
 }
