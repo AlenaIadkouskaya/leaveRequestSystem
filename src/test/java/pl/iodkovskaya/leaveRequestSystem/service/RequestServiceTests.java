@@ -14,6 +14,7 @@ import pl.iodkovskaya.leaveRequestSystem.model.dto.RequestDto;
 import pl.iodkovskaya.leaveRequestSystem.model.dto.RequestResponseDto;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.enums.RequestStatus;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.request.RequestEntity;
+import pl.iodkovskaya.leaveRequestSystem.model.entity.role.RoleEntity;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.user.UserEntity;
 import pl.iodkovskaya.leaveRequestSystem.reposityry.RequestRepository;
 
@@ -21,10 +22,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDate;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -349,5 +347,99 @@ public class RequestServiceTests {
         verify(userService, times(1)).findUserByEmail("test@example.com");
         verify(requestRepository, times(1)).findByUser(mockUser);
         verify(requestMapper, never()).fromEntity(any());
+    }
+
+    @Test
+    public void should_return_all_requests_not_approved_by_current_user() {
+        // given
+        RequestResponseDto requestResponseDto = new RequestResponseDto();
+        UserEntity approver = new UserEntity("", "", "", "", "",
+                new RoleEntity("ROLE_MANAGER", Set.of()), true);
+
+        RequestEntity request1 = new RequestEntity(mockUser, RequestStatus.PENDING, LocalDate.of(2024, 11, 1),
+                LocalDate.of(2024, 11, 1));
+        request1.approve(approver);
+
+        RequestEntity request2 = new RequestEntity(mockUser, RequestStatus.CREATED, LocalDate.of(2024, 11, 5),
+                LocalDate.of(2024, 11, 5));
+
+        List<RequestEntity> allRequests = List.of(request1, request2);
+
+        when(requestRepository.findAllRequestsToApprove()).thenReturn(allRequests);
+        when(requestMapper.fromEntity(request1)).thenReturn(requestResponseDto);
+        when(requestMapper.fromEntity(request2)).thenReturn(requestResponseDto);
+        when(userService.findUserByEmail(approver.getEmail())).thenReturn(approver);
+
+        // when
+        List<RequestResponseDto> result = requestService.getAllRequestsToApprove(approver.getEmail());
+
+        // then
+        assertThat(result.size()).isEqualTo(1);
+        verify(requestRepository, times(1)).findAllRequestsToApprove();
+        verify(requestMapper, times(1)).fromEntity(any(RequestEntity.class));
+    }
+
+    @Test
+    public void should_return_all_created_requests() {
+        // given
+        RequestResponseDto requestResponseDto = new RequestResponseDto();
+        UserEntity approver = new UserEntity("", "", "", "", "",
+                new RoleEntity("ROLE_MANAGER", Set.of()), true);
+
+        RequestEntity request1 = new RequestEntity(mockUser, RequestStatus.CREATED, LocalDate.of(2024, 11, 1),
+                LocalDate.of(2024, 11, 1));
+
+        RequestEntity request2 = new RequestEntity(mockUser, RequestStatus.CREATED, LocalDate.of(2024, 11, 5),
+                LocalDate.of(2024, 11, 5));
+
+        List<RequestEntity> allRequests = List.of(request1, request2);
+
+        when(requestRepository.findAllRequestsToApprove()).thenReturn(allRequests);
+        when(requestMapper.fromEntity(request1)).thenReturn(requestResponseDto);
+        when(requestMapper.fromEntity(request2)).thenReturn(requestResponseDto);
+        when(userService.findUserByEmail(approver.getEmail())).thenReturn(approver);
+
+        // when
+        List<RequestResponseDto> result = requestService.getAllRequestsToApprove(approver.getEmail());
+
+        // then
+        assertThat(result.size()).isEqualTo(2);
+        verify(requestRepository, times(1)).findAllRequestsToApprove();
+        verify(requestMapper, times(2)).fromEntity(any(RequestEntity.class));
+    }
+
+    @Test
+    public void should_get_all_requests_to_approve_sorted_by_start_date() {
+        // given
+        UserEntity approver = new UserEntity("", "", "", "", "",
+                new RoleEntity("ROLE_MANAGER", Set.of()), true);
+        UserEntity approverDone = new UserEntity("", "", "", "", "",
+                new RoleEntity("ROLE_HR", Set.of()), true);
+
+        RequestEntity request1 = new RequestEntity(mockUser, RequestStatus.PENDING, LocalDate.of(2024, 11, 11),
+                LocalDate.of(2024, 11, 11));
+        request1.approve(approverDone);
+
+        RequestEntity request2 = new RequestEntity(mockUser, RequestStatus.PENDING, LocalDate.of(2024, 11, 5),
+                LocalDate.of(2024, 11, 5));
+        request2.approve(approverDone);
+
+        List<RequestEntity> allRequests = List.of(request1, request2);
+
+        RequestResponseDto requestResponse1 = new RequestResponseDto(UUID.randomUUID(), "", RequestStatus.PENDING, request2.getStartDate(), request2.getEndDate());
+        RequestResponseDto requestResponse2 = new RequestResponseDto(UUID.randomUUID(), "", RequestStatus.PENDING, request1.getStartDate(), request1.getEndDate());
+
+        when(requestRepository.findAllRequestsToApprove()).thenReturn(allRequests);
+        when(requestMapper.fromEntity(request1)).thenReturn(requestResponse2);
+        when(requestMapper.fromEntity(request2)).thenReturn(requestResponse1);
+        when(userService.findUserByEmail(approver.getEmail())).thenReturn(approver);
+
+        // when
+        List<RequestResponseDto> result = requestService.getAllRequestsToApprove(approver.getEmail());
+
+        // then
+        assertThat(result.size()).isEqualTo(2);
+        assertThat(result.get(0).getStartDate()).isEqualTo(request2.getStartDate());
+        assertThat(result.get(1).getEndDate()).isEqualTo(request1.getEndDate());
     }
 }

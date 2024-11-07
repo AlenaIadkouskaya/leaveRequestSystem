@@ -15,4 +15,5 @@ public interface RequestService {
     List<RequestResponseDto> getAllRequests();
     RequestResponseDto getRequestById(UUID id);
     List<RequestResponseDto> getRequestsByUser(String userEmail);
+    List<RequestResponseDto> getAllRequestsToApprove(String username);
 }

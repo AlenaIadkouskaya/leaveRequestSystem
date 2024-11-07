@@ -16,7 +16,6 @@ import pl.iodkovskaya.leaveRequestSystem.service.VacationBalanceService;
 @RequestMapping("/api/vacation-balance")
 public class VacationBalanceController {
     private final VacationBalanceService vacationBalanceService;
-
     @PostMapping("/new")
     public ResponseEntity<String> createVacationBalance(@Valid @RequestBody VacationBalanceDto vacationBalanceDto) {
         vacationBalanceService.addRecord(vacationBalanceDto);

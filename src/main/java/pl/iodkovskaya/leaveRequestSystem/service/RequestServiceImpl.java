@@ -14,6 +14,7 @@ import pl.iodkovskaya.leaveRequestSystem.reposityry.RequestRepository;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -81,25 +82,6 @@ public class RequestServiceImpl implements RequestService {
         return requestRepository.findAll().stream().map(e -> requestMapper.fromEntity(e)).toList();
     }
 
-    private boolean hasOverlappingRequests(RequestEntity requestEntity) {
-
-        return requestRepository.findAllByUserAndDateRange(
-                requestEntity.getUser(),
-                requestEntity.getStartDate(),
-                requestEntity.getEndDate()).size() > 0;
-    }
-
-    private void updateVacationBalance(UserEntity user, RequestEntity request) {
-        int days = (int) (ChronoUnit.DAYS.between(request.getStartDate(), request.getEndDate()) + 1) * (-1);
-        vacationBalanceService.updateRemainder(user, days);
-    }
-
-    //    @Override
-//    public RequestResponseDto getRequestById(UUID id) {
-//        RequestEntity request = requestRepository.findByTechnicalId(id)
-//                .orElseThrow(() -> new EntityNotFoundException("Request not found with technical ID: " + id));
-//        return requestMapper.fromEntity(request);
-//    }
     @Override
     public RequestResponseDto getRequestById(UUID id) {
         return requestRepository.findByTechnicalId(id)
@@ -116,11 +98,44 @@ public class RequestServiceImpl implements RequestService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<RequestResponseDto> getAllRequestsToApprove(String username) {
+        UserEntity approver = findUserByEmailOrThrow(username);
+        List<RequestEntity> filteredRequests = findAllRequestsToApproveForCurrentApprover(approver);
+
+        return filteredRequests.stream()
+                .map(requestMapper::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    private List<RequestEntity> findAllRequestsToApproveForCurrentApprover(UserEntity approver) {
+        List<RequestEntity> allRequestsToApprove = requestRepository.findAllRequestsToApprove();
+
+        return allRequestsToApprove.stream()
+                .filter(request -> request.getApprovers().stream()
+                        .noneMatch(approverInList -> approverInList.getRole().getRoleName().equals(approver.getRole().getRoleName())))
+                .sorted(Comparator.comparing(RequestEntity::getStartDate))
+                .toList();
+    }
+
     private UserEntity findUserByEmailOrThrow(String email) {
         UserEntity user = userService.findUserByEmail(email);
         if (user == null) {
             throw new EntityNotFoundException("User not found with email: " + email);
         }
         return user;
+    }
+
+    private void updateVacationBalance(UserEntity user, RequestEntity request) {
+        int days = (int) (ChronoUnit.DAYS.between(request.getStartDate(), request.getEndDate()) + 1) * (-1);
+        vacationBalanceService.updateRemainder(user, days);
+    }
+
+    private boolean hasOverlappingRequests(RequestEntity requestEntity) {
+
+        return requestRepository.findAllByUserAndDateRange(
+                requestEntity.getUser(),
+                requestEntity.getStartDate(),
+                requestEntity.getEndDate()).size() > 0;
     }
 }

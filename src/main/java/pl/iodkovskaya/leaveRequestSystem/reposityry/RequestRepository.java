@@ -25,5 +25,8 @@ public interface RequestRepository extends JpaRepository<RequestEntity, Long> {
 
     Optional<RequestEntity> findByTechnicalId(UUID technicalId);
     List<RequestEntity> findByUser(UserEntity userId);
+    @Query("SELECT r FROM RequestEntity r WHERE r.status IN (pl.iodkovskaya.leaveRequestSystem.model.entity.enums.RequestStatus.CREATED, " +
+            "pl.iodkovskaya.leaveRequestSystem.model.entity.enums.RequestStatus.PENDING)")
+    List<RequestEntity> findAllRequestsToApprove();
 
 }

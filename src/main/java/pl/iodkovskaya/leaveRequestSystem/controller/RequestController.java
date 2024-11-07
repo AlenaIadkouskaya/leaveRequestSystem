@@ -63,5 +63,9 @@ public class RequestController {
         String username = ((User) currentUser).getUsername();
         return requestService.getRequestsByUser(username);
     }
-
+    @GetMapping("/to-approve")
+    public List<RequestResponseDto> getAllRequestsToApprove(@AuthenticationPrincipal Object currentUser) {
+        String username = ((User) currentUser).getUsername();
+        return requestService.getAllRequestsToApprove(username);
+    }
 }
