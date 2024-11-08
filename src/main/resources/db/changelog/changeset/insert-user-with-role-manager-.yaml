@@ -1,0 +1,29 @@
+databaseChangeLog:
+  - changeSet:
+      id: 2
+      author: author
+      changes:
+        - insert:
+            tableName: users
+            columns:
+              - column:
+                  name: username
+                  value: "user_manager"
+              - column:
+                  name: password_hash
+                  value: "$2b$12$vsxs24RQZeg7NRcSywuDyuCb6Oh0dTcrTpMEmKgJA10AIlCkuGtXy"
+              - column:
+                  name: first_name
+                  value: "manager"
+              - column:
+                  name: last_name
+                  value: ""
+              - column:
+                  name: email
+                  value: "manager@gmail.com"
+              - column:
+                  name: enabled
+                  value: "true"
+              - column:
+                  name: role_id
+                  value: "3"  # Предполагается, что role_id для "ROLE_MANAGER" будет 2
