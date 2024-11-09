@@ -2,6 +2,8 @@ package pl.iodkovskaya.leaveRequestSystem.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import pl.iodkovskaya.leaveRequestSystem.exception.UserAlreadyExistsException;
@@ -30,7 +32,7 @@ public class UserServiceImpl implements UserService {
         UserEntity userEntity = userRepository.findByEmail(user.getEmail());
 
         if (userEntity != null) {
-            throw new UserAlreadyExistsException("User with email: " + user.getEmail()+" exists!");
+            throw new UserAlreadyExistsException("User with email: " + user.getEmail() + " exists!");
         }
         try {
             userRepository.save(new UserEntity(user.getLogin(),
@@ -56,7 +58,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void addRoleToUser(String email, String roleName, List<String> authorities) throws AccessDeniedException {
+    public void addRoleToUser(String email, String roleName, UserDetails currentUser) throws AccessDeniedException {
+        List<String> authorities = currentUser.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .toList();
         if (!authorities.contains("ROLE_MANAGER")) {
             throw new AccessDeniedException("Forbidden: You do not have permission to update this user");
         }
@@ -72,9 +77,10 @@ public class UserServiceImpl implements UserService {
         }
 
         RoleEntity role = roleService.findRoleByName(roleName);
-
+        if (role == null) {
+            throw new EntityNotFoundException("Role not exists");
+        }
         user.addRole(role);
-
         userRepository.save(user);
     }
 }

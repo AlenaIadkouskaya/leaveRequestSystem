@@ -3,19 +3,17 @@ package pl.iodkovskaya.leaveRequestSystem.controller;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-import pl.iodkovskaya.leaveRequestSystem.model.dto.RequestDto;
 import pl.iodkovskaya.leaveRequestSystem.model.dto.UserDto;
-import pl.iodkovskaya.leaveRequestSystem.model.entity.user.UserEntity;
-import pl.iodkovskaya.leaveRequestSystem.service.RequestService;
 import pl.iodkovskaya.leaveRequestSystem.service.UserService;
 
 import java.nio.file.AccessDeniedException;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @RestController
@@ -31,12 +29,10 @@ public class UserController {
     }
 
     @PatchMapping("/add-role/{email}")
-    public ResponseEntity<String> addRoleToUser(@AuthenticationPrincipal User currentUser, @PathVariable String email, @RequestParam String roleName) throws AccessDeniedException {
-        List<String> authorities = currentUser.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .toList();
+    @PreAuthorize("hasRole('ROLE_MANAGER')")
+    public ResponseEntity<String> addRoleToUser(@AuthenticationPrincipal UserDetails currentUser, @PathVariable String email, @RequestParam String roleName) throws AccessDeniedException {
 
-        userService.addRoleToUser(email, roleName, authorities);
+        userService.addRoleToUser(email, roleName, currentUser);
 
         return ResponseEntity.status(HttpStatus.OK).body("Role has changed successfully");
     }

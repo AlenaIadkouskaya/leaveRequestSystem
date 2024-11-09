@@ -1,6 +1,7 @@
 package pl.iodkovskaya.leaveRequestSystem.service;
 
 
+import org.springframework.security.core.userdetails.UserDetails;
 import pl.iodkovskaya.leaveRequestSystem.model.dto.UserDto;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.user.UserEntity;
 
@@ -16,5 +17,5 @@ public interface UserService {
 
     UserEntity findUserById(Long id);
 
-    void addRoleToUser(String email, String roleName, List<String> authorities) throws AccessDeniedException;
+    void addRoleToUser(String email, String roleName, UserDetails currentUser) throws AccessDeniedException;
 }
