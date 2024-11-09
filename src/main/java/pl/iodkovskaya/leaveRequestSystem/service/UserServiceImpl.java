@@ -52,14 +52,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean addRoleToUser(String email, String roleName, List<String> authorities) throws AccessDeniedException {
+    public void addRoleToUser(String email, String roleName, List<String> authorities) throws AccessDeniedException {
         if (!authorities.contains("ROLE_MANAGER")) {
             throw new AccessDeniedException("Forbidden: You do not have permission to update this user");
         }
-        return true;
+        updateUser(email, roleName);
     }
 
-    public boolean updateUser(String email, String roleName) {
+    private void updateUser(String email, String roleName) {
 
         UserEntity user = userRepository.findByEmail(email);
 
@@ -69,11 +69,8 @@ public class UserServiceImpl implements UserService {
 
         RoleEntity role = roleService.findRoleByName(roleName);
 
-        if (!user.getRole().equals(role)) {
-            user.addRole(role);
-        }
+        user.addRole(role);
 
         userRepository.save(user);
-        return true;
     }
 }

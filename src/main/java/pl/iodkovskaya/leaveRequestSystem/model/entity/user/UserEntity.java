@@ -3,6 +3,7 @@ package pl.iodkovskaya.leaveRequestSystem.model.entity.user;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import pl.iodkovskaya.leaveRequestSystem.exception.RoleExistException;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.role.RoleEntity;
 
 import java.util.HashSet;
@@ -61,6 +62,9 @@ public class UserEntity {
     }
 
     public void addRole(RoleEntity role) {
+        if (this.role.equals(role)) {
+            throw new RoleExistException("User already has this role " + role);
+        }
         setRole(role);
     }
 

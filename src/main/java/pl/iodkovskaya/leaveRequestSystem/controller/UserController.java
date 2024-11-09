@@ -1,6 +1,7 @@
 package pl.iodkovskaya.leaveRequestSystem.controller;
 
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -28,18 +29,15 @@ public class UserController {
         userService.registerNewUser(userDto);
         return ResponseEntity.ok("User registered successfully");
     }
+
     @PatchMapping("/add-role/{email}")
     public ResponseEntity<String> addRoleToUser(@AuthenticationPrincipal User currentUser, @PathVariable String email, @RequestParam String roleName) throws AccessDeniedException {
         List<String> authorities = currentUser.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .toList();
 
-        boolean success = userService.addRoleToUser(email, roleName, authorities);
+        userService.addRoleToUser(email, roleName, authorities);
 
-        if (success) {
-            return ResponseEntity.ok("Role added successfully");
-        } else {
-            return ResponseEntity.status(404).body("User or Role not found");
-        }
+        return ResponseEntity.status(HttpStatus.OK).body("Role has changed successfully");
     }
 }

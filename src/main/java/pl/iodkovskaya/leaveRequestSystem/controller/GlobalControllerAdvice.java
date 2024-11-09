@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import pl.iodkovskaya.leaveRequestSystem.exception.InvalidOperationException;
+import pl.iodkovskaya.leaveRequestSystem.exception.RoleExistException;
 import pl.iodkovskaya.leaveRequestSystem.exception.StatusException;
 import pl.iodkovskaya.leaveRequestSystem.model.dto.MessageResponse;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.enums.ErrorCode;
@@ -88,5 +89,12 @@ public class GlobalControllerAdvice {
 
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
-
+    @ExceptionHandler(RoleExistException.class)
+    public ResponseEntity<MessageResponse> handleRoleExistException(RoleExistException ex) {
+        MessageResponse response = new MessageResponse(
+                ex.getMessage(),
+                ErrorCode.ROLE_ALREADY_EXISTS
+        );
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
 }

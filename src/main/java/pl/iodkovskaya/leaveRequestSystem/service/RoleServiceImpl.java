@@ -8,11 +8,12 @@ import pl.iodkovskaya.leaveRequestSystem.reposityry.RoleRepository;
 
 @Service
 @AllArgsConstructor
-public class RoleServiceImpl implements RoleService{
+public class RoleServiceImpl implements RoleService {
     private final RoleRepository roleRepository;
+
     @Override
     public RoleEntity findRoleByName(String name) {
-        return roleRepository.findByRoleName(name).orElseThrow(() -> new EntityNotFoundException("Not found role USER"));
+        return roleRepository.findByRoleName(name).orElseThrow(() -> new EntityNotFoundException("Not found role" + name));
     }
 
 }
