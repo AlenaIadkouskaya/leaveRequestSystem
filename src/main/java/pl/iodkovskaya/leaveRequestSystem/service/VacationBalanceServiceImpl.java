@@ -5,13 +5,16 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import pl.iodkovskaya.leaveRequestSystem.exception.InvalidOperationException;
 import pl.iodkovskaya.leaveRequestSystem.model.dto.VacationBalanceDto;
+import pl.iodkovskaya.leaveRequestSystem.model.entity.request.RequestEntity;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.user.UserEntity;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.vacationbalance.VacationBalanceEntity;
 import pl.iodkovskaya.leaveRequestSystem.reposityry.VacationBalanceRepository;
 
+import java.time.temporal.ChronoUnit;
+
 @Service
 @AllArgsConstructor
-public class VacationBalanceServiceImpl implements VacationBalanceService {
+public class VacationBalanceServiceImpl implements VacationBalanceService, RequestListener {
     private final UserService userService;
     private final VacationBalanceRepository vacationBalanceRepository;
 
@@ -38,10 +41,22 @@ public class VacationBalanceServiceImpl implements VacationBalanceService {
     }
 
     @Override
-    public void updateRemainder(UserEntity user, Integer durationVacation) {
+    public void decreaseRemainder(UserEntity user, RequestEntity request) {
+        int days = getDaysVacation(request);
         VacationBalanceEntity vacationBalance = vacationBalanceRepository.findByUser(user)
                 .orElseThrow(() -> new InvalidOperationException("No data on remaining vacation days"));
-        vacationBalance.increaseUsedDays(durationVacation);
+        vacationBalance.increaseUsedDays(days);
     }
 
+    @Override
+    public void increaseRemainder(UserEntity user, RequestEntity request) {
+        int days = getDaysVacation(request);
+        VacationBalanceEntity vacationBalance = vacationBalanceRepository.findByUser(user)
+                .orElseThrow(() -> new InvalidOperationException("No data on remaining vacation days"));
+        vacationBalance.decreaseUsedDays(days);
+    }
+    private static int getDaysVacation(RequestEntity request) {
+        int days = (int) (ChronoUnit.DAYS.between(request.getStartDate(), request.getEndDate()) + 1);
+        return days;
+    }
 }

@@ -41,12 +41,17 @@ public class VacationBalanceEntity {
 
     }
 
-    public void decreaseRemainingDays() {
+    public void updateRemainderDays() {
         this.remainingDays = this.totalDays - this.usedDays;
     }
 
-    public void increaseUsedDays(Integer durationVacation) {
+    public void increaseUsedDays(int durationVacation) {
         this.usedDays = this.usedDays + durationVacation;
-        decreaseRemainingDays();
+        updateRemainderDays();
+    }
+
+    public void decreaseUsedDays(int durationVacation) {
+        this.usedDays = this.usedDays - durationVacation;
+        updateRemainderDays();
     }
 }

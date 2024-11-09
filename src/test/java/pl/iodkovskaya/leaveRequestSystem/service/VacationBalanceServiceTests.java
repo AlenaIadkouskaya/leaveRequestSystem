@@ -1,7 +1,6 @@
 package pl.iodkovskaya.leaveRequestSystem.service;
 
 import jakarta.persistence.EntityNotFoundException;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
@@ -10,10 +9,13 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import pl.iodkovskaya.leaveRequestSystem.exception.InvalidOperationException;
 import pl.iodkovskaya.leaveRequestSystem.model.dto.VacationBalanceDto;
+import pl.iodkovskaya.leaveRequestSystem.model.entity.enums.RequestStatus;
+import pl.iodkovskaya.leaveRequestSystem.model.entity.request.RequestEntity;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.user.UserEntity;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.vacationbalance.VacationBalanceEntity;
 import pl.iodkovskaya.leaveRequestSystem.reposityry.VacationBalanceRepository;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -104,11 +106,12 @@ public class VacationBalanceServiceTests {
         // given
         UserEntity userEntity = new UserEntity("login", "1", "a@gmail.com");
         VacationBalanceEntity vacationBalance = new VacationBalanceEntity(1L, userEntity, 10, 0, 10);
+        RequestEntity request = new RequestEntity(userEntity, RequestStatus.CREATED, LocalDate.now(), LocalDate.now().plusDays(5));
         when(vacationBalanceRepository.findByUser(userEntity)).thenReturn(Optional.of(vacationBalance));
+        int durationVacation = 6;
 
         // when
-        int durationVacation = 5;
-        vacationBalanceService.updateRemainder(userEntity, durationVacation);
+        vacationBalanceService.decreaseRemainder(userEntity, request);
 
         // then
         verify(vacationBalanceRepository, times(1)).findByUser(userEntity);
@@ -119,10 +122,11 @@ public class VacationBalanceServiceTests {
     public void should_throw_exception_before_updating_remainder_when_no_balance() {
         // given
         UserEntity userEntity = new UserEntity("login", "1", "a@gmail.com");
+        RequestEntity request = new RequestEntity(userEntity, RequestStatus.CREATED, LocalDate.now(), LocalDate.now().plusDays(5));
         when(vacationBalanceRepository.findByUser(userEntity)).thenReturn(Optional.empty());
 
         // when
-        Executable e = () -> vacationBalanceService.updateRemainder(userEntity, 5);
+        Executable e = () -> vacationBalanceService.increaseRemainder(userEntity, request);
 
         // then
         assertThrows(InvalidOperationException.class, e);

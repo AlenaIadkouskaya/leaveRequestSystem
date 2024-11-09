@@ -13,7 +13,6 @@ import pl.iodkovskaya.leaveRequestSystem.model.entity.user.UserEntity;
 import pl.iodkovskaya.leaveRequestSystem.reposityry.RequestRepository;
 
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
@@ -24,7 +23,8 @@ import java.util.stream.Collectors;
 public class RequestServiceImpl implements RequestService {
     private final RequestRepository requestRepository;
     private final UserService userService;
-    private final VacationBalanceService vacationBalanceService;
+    //private final VacationBalanceService vacationBalanceService;
+    private final RequestListener requestListener;
     private final RequestMapper requestMapper;
 
     @Override
@@ -41,7 +41,7 @@ public class RequestServiceImpl implements RequestService {
                 startVacation,
                 endVacation);
 
-        vacationBalanceService.checkRemainderForUser(userByEmail, leaveRequestDto.getDurationVacation());
+        requestListener.checkRemainderForUser(userByEmail, leaveRequestDto.getDurationVacation());
 
         if (hasOverlappingRequests(newRequest)) {
             throw new IllegalArgumentException("There is already a leave request for this period");
@@ -49,7 +49,7 @@ public class RequestServiceImpl implements RequestService {
 
         try {
             RequestEntity savedRequest = requestRepository.save(newRequest);
-            vacationBalanceService.updateRemainder(userByEmail, leaveRequestDto.getDurationVacation());
+            requestListener.decreaseRemainder(userByEmail, savedRequest);
             return savedRequest.getTechnicalId();
         } catch (Exception e) {
             throw new RuntimeException("Error saving leave request: " + e.getMessage(), e);
@@ -74,7 +74,7 @@ public class RequestServiceImpl implements RequestService {
                 .orElseThrow(() -> new EntityNotFoundException("Request not found with technical ID: " + technicalId));
 
         request.reject();
-        updateVacationBalance(request.getUser(), request);
+        requestListener.increaseRemainder(request.getUser(), request);
     }
 
     @Override
@@ -127,8 +127,7 @@ public class RequestServiceImpl implements RequestService {
     }
 
     private void updateVacationBalance(UserEntity user, RequestEntity request) {
-        int days = (int) (ChronoUnit.DAYS.between(request.getStartDate(), request.getEndDate()) + 1) * (-1);
-        vacationBalanceService.updateRemainder(user, days);
+
     }
 
     private boolean hasOverlappingRequests(RequestEntity requestEntity) {

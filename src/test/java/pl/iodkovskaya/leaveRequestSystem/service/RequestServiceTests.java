@@ -5,10 +5,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import pl.iodkovskaya.leaveRequestSystem.exception.InvalidOperationException;
 import pl.iodkovskaya.leaveRequestSystem.exception.StatusException;
 import pl.iodkovskaya.leaveRequestSystem.mapper.RequestMapper;
@@ -20,8 +18,6 @@ import pl.iodkovskaya.leaveRequestSystem.model.entity.role.RoleEntity;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.user.UserEntity;
 import pl.iodkovskaya.leaveRequestSystem.reposityry.RequestRepository;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDate;
 import java.util.*;
@@ -36,7 +32,7 @@ public class RequestServiceTests {
     private final RequestMapper requestMapper = Mockito.mock(RequestMapper.class);
     private final RequestRepository requestRepository = Mockito.mock(RequestRepository.class);
     private final UserService userService = Mockito.mock(UserService.class);
-    private final VacationBalanceService vacationBalanceService = Mockito.mock(VacationBalanceService.class);
+    private final RequestListener requestListner = Mockito.mock(RequestListener.class);
     @InjectMocks
     private RequestServiceImpl requestService;
     private final UserEntity mockUser = Mockito.mock(UserEntity.class);
@@ -47,15 +43,16 @@ public class RequestServiceTests {
         UserEntity userEntity = new UserEntity("login", "1", "test@example.com");
         RequestDto leaveRequestDto = new RequestDto(LocalDate.now(), 5);
         when(userService.findUserByEmail("test@example.com")).thenReturn(userEntity);
-        when(requestRepository.save(any(RequestEntity.class))).thenReturn(new RequestEntity());
-        doNothing().when(vacationBalanceService).checkRemainderForUser(userEntity, leaveRequestDto.getDurationVacation());
+        RequestEntity requestEntity = new RequestEntity();
+        when(requestRepository.save(any(RequestEntity.class))).thenReturn(requestEntity);
+        doNothing().when(requestListner).checkRemainderForUser(userEntity, leaveRequestDto.getDurationVacation());
 
         // when
         requestService.createLeaveRequest("test@example.com", leaveRequestDto);
 
         // then
         verify(requestRepository, times(1)).save(any(RequestEntity.class));
-        verify(vacationBalanceService, times(1)).updateRemainder(userEntity, leaveRequestDto.getDurationVacation());
+        verify(requestListner, times(1)).decreaseRemainder(userEntity, requestEntity);
     }
 
     @Test
@@ -78,7 +75,7 @@ public class RequestServiceTests {
         RequestDto leaveRequestDto = new RequestDto(LocalDate.now(), 5);
         when(userService.findUserByEmail("test@example.com")).thenReturn(userEntity);
         doThrow(new InvalidOperationException("Insufficient vacation days available. Your remainder: 0"))
-                .when(vacationBalanceService).checkRemainderForUser(userEntity, leaveRequestDto.getDurationVacation());
+                .when(requestListner).checkRemainderForUser(userEntity, leaveRequestDto.getDurationVacation());
 
         // when
         Executable e = () -> requestService.createLeaveRequest("test@example.com", leaveRequestDto);
@@ -93,7 +90,7 @@ public class RequestServiceTests {
         UserEntity userEntity = new UserEntity("login", "1", "test@example.com");
         RequestDto leaveRequestDto = new RequestDto(LocalDate.now(), 5);
         when(userService.findUserByEmail("test@example.com")).thenReturn(userEntity);
-        doNothing().when(vacationBalanceService).checkRemainderForUser(userEntity, leaveRequestDto.getDurationVacation());
+        doNothing().when(requestListner).checkRemainderForUser(userEntity, leaveRequestDto.getDurationVacation());
 
         RequestEntity overlappingRequest = new RequestEntity(userEntity, RequestStatus.CREATED, LocalDate.now(), LocalDate.now().plusDays(5));
         when(requestRepository.findAllByUserAndDateRange(any(), any(), any())).thenReturn(List.of(overlappingRequest));
@@ -111,7 +108,7 @@ public class RequestServiceTests {
         UserEntity userEntity = new UserEntity("login", "1", "test@example.com");
         RequestDto leaveRequestDto = new RequestDto(LocalDate.now(), 5);
         when(userService.findUserByEmail("test@example.com")).thenReturn(userEntity);
-        doNothing().when(vacationBalanceService).checkRemainderForUser(userEntity, leaveRequestDto.getDurationVacation());
+        doNothing().when(requestListner).checkRemainderForUser(userEntity, leaveRequestDto.getDurationVacation());
         doThrow(new RuntimeException("Database error"))
                 .when(requestRepository).save(any(RequestEntity.class));
 
