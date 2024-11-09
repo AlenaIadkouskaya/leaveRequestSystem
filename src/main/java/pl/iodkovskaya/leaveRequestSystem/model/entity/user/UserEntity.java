@@ -6,9 +6,6 @@ import lombok.NoArgsConstructor;
 import pl.iodkovskaya.leaveRequestSystem.exception.RoleExistException;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.role.RoleEntity;
 
-import java.util.HashSet;
-import java.util.Set;
-
 @Entity
 @Table(name = "users")
 @Getter
@@ -48,6 +45,11 @@ public class UserEntity {
         this.email = email;
         this.role = role;
         this.enabled = enabled;
+    }
+
+    public UserEntity(Long userId, String email) {
+        this.userId = userId;
+        this.email = email;
     }
 
     public UserEntity(String username, String passwordHash, String email) {
