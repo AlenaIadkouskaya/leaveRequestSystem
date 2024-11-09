@@ -12,7 +12,8 @@ public enum ErrorCode {
     BUSINESS_LOGIC_ERROR(400, "Business logic violation occurred"),
     ACCESS_DENIED(403, "Access denied: insufficient permissions"),
     STATUS_CONFLICT(409, "Conflict with the current status"),
-    ROLE_ALREADY_EXISTS(409, "Role already exists: the specified role is duplicate");
+    ROLE_ALREADY_EXISTS(409, "Role already exists: the specified role is duplicate"),
+    USER_ALREADY_EXISTS(409, "User already exists: the specified user data conflicts");
 
     private final int code;
     private final String message;

@@ -2,9 +2,9 @@ package pl.iodkovskaya.leaveRequestSystem.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import pl.iodkovskaya.leaveRequestSystem.exception.UserAlreadyExistsException;
 import pl.iodkovskaya.leaveRequestSystem.model.dto.UserDto;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.role.RoleEntity;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.user.UserEntity;
@@ -12,7 +12,6 @@ import pl.iodkovskaya.leaveRequestSystem.reposityry.UserRepository;
 
 import java.nio.file.AccessDeniedException;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -28,6 +27,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void registerNewUser(UserDto user) {
+        UserEntity userEntity = userRepository.findByEmail(user.getEmail());
+
+        if (userEntity != null) {
+            throw new UserAlreadyExistsException("User with email: " + user.getEmail()+" exists!");
+        }
         try {
             userRepository.save(new UserEntity(user.getLogin(),
                     passwordEncoder.encode(user.getPassword()),
@@ -37,7 +41,7 @@ public class UserServiceImpl implements UserService {
                     roleService.findRoleByName("ROLE_USER"),
                     true));
         } catch (RuntimeException e) {
-            //TO DO
+            throw new RuntimeException("Transaction failed while registering new user", e);
         }
     }
 
