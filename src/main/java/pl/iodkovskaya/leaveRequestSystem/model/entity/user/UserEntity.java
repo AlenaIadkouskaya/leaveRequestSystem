@@ -3,11 +3,10 @@ package pl.iodkovskaya.leaveRequestSystem.model.entity.user;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.role.RoleEntity;
 
-import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -56,12 +55,16 @@ public class UserEntity {
         this.email = email;
     }
 
-    public boolean isEnabled() {
-        return enabled;
-    }
-
     @Override
     public String toString() {
         return lastName + " " + firstName;
+    }
+
+    public void addRole(RoleEntity role) {
+        setRole(role);
+    }
+
+    private void setRole(RoleEntity role) {
+        this.role = role;
     }
 }

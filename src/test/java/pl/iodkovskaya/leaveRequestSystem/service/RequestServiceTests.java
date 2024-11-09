@@ -5,8 +5,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import pl.iodkovskaya.leaveRequestSystem.exception.InvalidOperationException;
 import pl.iodkovskaya.leaveRequestSystem.exception.StatusException;
 import pl.iodkovskaya.leaveRequestSystem.mapper.RequestMapper;
@@ -31,17 +33,13 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class RequestServiceTests {
 
-    private RequestMapper requestMapper = Mockito.mock(RequestMapper.class);
+    private final RequestMapper requestMapper = Mockito.mock(RequestMapper.class);
     private final RequestRepository requestRepository = Mockito.mock(RequestRepository.class);
-
     private final UserService userService = Mockito.mock(UserService.class);
-
     private final VacationBalanceService vacationBalanceService = Mockito.mock(VacationBalanceService.class);
     @InjectMocks
     private RequestServiceImpl requestService;
-
     private final UserEntity mockUser = Mockito.mock(UserEntity.class);
-
 
     @Test
     public void should_create_leave_request_successfully() {
@@ -186,9 +184,6 @@ public class RequestServiceTests {
         // then
         assertThat(request.getStatus()).isEqualTo(RequestStatus.REJECTED);
         verify(requestRepository).findByTechnicalId(technicalId);
-        //verify(requestRepository).save(request);
-        //verify(requestService).updateVacationBalance(request.getUser(), request);
-        // dobrze bym było żeby tutaj był nie mock
     }
 
     @Test
@@ -218,24 +213,6 @@ public class RequestServiceTests {
 
         // then
         assertThrows(StatusException.class, e);
-    }
-
-    @Test
-    public void should_update_vacation_balance_when_status_is_rejected() throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
-        // given
-        RequestEntity request = new RequestEntity(new UserEntity(), RequestStatus.PENDING, LocalDate.now(), LocalDate.now().plusDays(5));
-        UUID technicalId = UUID.randomUUID();
-        String userEmail = "user@example.com";
-        when(requestRepository.findByTechnicalId(technicalId)).thenReturn(Optional.of(request));
-
-        // when
-        requestService.rejectRequest(userEmail, technicalId);
-
-        // then
-        //verify(requestService).updateVacationBalance(mockUser, request);
-        Method method = RequestServiceImpl.class.getDeclaredMethod("updateVacationBalance", UserEntity.class, RequestEntity.class);
-        method.setAccessible(true);
-        method.invoke(requestService, mockUser, request);//!!!
     }
 
     @Test

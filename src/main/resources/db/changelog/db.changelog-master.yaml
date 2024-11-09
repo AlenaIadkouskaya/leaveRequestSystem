@@ -3,5 +3,5 @@ databaseChangeLog:
       file: db/changelog/changeset/create-table-authorities.yaml
   - include:
       file: db/changelog/changeset/insert-authorities.yaml
-  - include:
-      file: db/changelog/changeset/insert-user-with-role-manager-.yaml
+#  - include:
+#      file: db/changelog/changeset/insert-user-with-role-manager-.yaml

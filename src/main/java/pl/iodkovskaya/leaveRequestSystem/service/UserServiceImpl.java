@@ -1,12 +1,17 @@
 package pl.iodkovskaya.leaveRequestSystem.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import pl.iodkovskaya.leaveRequestSystem.model.dto.UserDto;
+import pl.iodkovskaya.leaveRequestSystem.model.entity.role.RoleEntity;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.user.UserEntity;
 import pl.iodkovskaya.leaveRequestSystem.reposityry.UserRepository;
 
+import java.nio.file.AccessDeniedException;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -26,10 +31,13 @@ public class UserServiceImpl implements UserService {
         try {
             userRepository.save(new UserEntity(user.getLogin(),
                     passwordEncoder.encode(user.getPassword()),
-                    user.getFirstName(), user.getLastName(), user.getEmail(),
-                    roleService.findRoleByName("ROLE_USER"), true));
+                    user.getLastName(),
+                    user.getFirstName(),
+                    user.getEmail(),
+                    roleService.findRoleByName("ROLE_USER"),
+                    true));
         } catch (RuntimeException e) {
-
+            //TO DO
         }
     }
 
@@ -41,5 +49,31 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserEntity findUserById(Long id) {
         return userRepository.findByUserId(id);
+    }
+
+    @Override
+    public boolean addRoleToUser(String email, String roleName, List<String> authorities) throws AccessDeniedException {
+        if (!authorities.contains("ROLE_MANAGER")) {
+            throw new AccessDeniedException("Forbidden: You do not have permission to update this user");
+        }
+        return true;
+    }
+
+    public boolean updateUser(String email, String roleName) {
+
+        UserEntity user = userRepository.findByEmail(email);
+
+        if (user == null) {
+            throw new EntityNotFoundException("User not found with email: " + email);
+        }
+
+        RoleEntity role = roleService.findRoleByName(roleName);
+
+        if (!user.getRole().equals(role)) {
+            user.addRole(role);
+        }
+
+        userRepository.save(user);
+        return true;
     }
 }

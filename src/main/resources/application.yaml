@@ -4,14 +4,14 @@ spring:
   application:
     name: leaveRequestSystem
   datasource:
+    username: <YOUR_USERNAME>
+    password: <YOUR_PASSWORD>>
     url: jdbc:postgresql://localhost:8081/vacations
-    username: <YOUR_NAME>
-    password: <YOUR_PASSWORD>
     driver-class-name: org.postgresql.Driver
-    initialization-mode: embedded
-  h2:
-    console:
-      enabled: true
+#    initialization-mode: embedded
+#  h2:
+#    console:
+#      enabled: true
   jpa:
     hibernate:
       ddl-auto: update
@@ -20,6 +20,7 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         show-sql: true
+    defer-datasource-initialization=true:
   profiles:
     include: local
   security:
@@ -52,5 +53,7 @@ logging:
         type.descriptor.sql.BasicBinder: TRACE
 #    root: DEBUG
 #spring.jpa.defer-datasource-initialization=true
+
+
 
 

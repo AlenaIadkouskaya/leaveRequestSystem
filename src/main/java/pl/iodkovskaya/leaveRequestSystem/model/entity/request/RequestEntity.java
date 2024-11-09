@@ -3,7 +3,6 @@ package pl.iodkovskaya.leaveRequestSystem.model.entity.request;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
 import pl.iodkovskaya.leaveRequestSystem.exception.StatusException;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.enums.RequestStatus;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.role.RoleEntity;
@@ -11,7 +10,6 @@ import pl.iodkovskaya.leaveRequestSystem.model.entity.user.UserEntity;
 
 import java.time.LocalDate;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -29,7 +27,7 @@ public class RequestEntity {
     @Column(name = "technical_id", nullable = false, unique = true)
     private UUID technicalId;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id", nullable = false)
     private UserEntity user;
 
