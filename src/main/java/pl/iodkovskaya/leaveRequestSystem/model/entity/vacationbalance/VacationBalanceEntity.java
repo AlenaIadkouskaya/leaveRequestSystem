@@ -54,4 +54,9 @@ public class VacationBalanceEntity {
         this.usedDays = this.usedDays - durationVacation;
         updateRemainderDays();
     }
+
+    public void incrementTotalDays(int days) {
+        this.totalDays += days;
+        updateRemainderDays();
+    }
 }

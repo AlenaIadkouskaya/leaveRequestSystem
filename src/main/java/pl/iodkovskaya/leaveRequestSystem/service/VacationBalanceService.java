@@ -7,5 +7,5 @@ import pl.iodkovskaya.leaveRequestSystem.model.entity.user.UserEntity;
 public interface VacationBalanceService {
     void addRecord(VacationBalanceDto vacationBalanceDto);
 
-
+    void incrementVacationDaysMonthly();
 }

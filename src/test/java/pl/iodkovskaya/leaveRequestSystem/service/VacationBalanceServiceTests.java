@@ -132,4 +132,6 @@ public class VacationBalanceServiceTests {
         assertThrows(InvalidOperationException.class, e);
         verify(vacationBalanceRepository, times(1)).findByUser(userEntity);
     }
+
+
 }

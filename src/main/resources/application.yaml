@@ -51,6 +51,12 @@ logging:
       hibernate:
         SQL: DEBUG
         type.descriptor.sql.BasicBinder: TRACE
+    pl:
+      iodkovskaya:
+        leaveRequestSystem:
+          service: INFO
+  file:
+    name: logs/vacation_balance.log
 #    root: DEBUG
 #spring.jpa.defer-datasource-initialization=true
 
