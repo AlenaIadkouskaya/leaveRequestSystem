@@ -23,9 +23,9 @@ import java.util.stream.Collectors;
 public class RequestServiceImpl implements RequestService {
     private final RequestRepository requestRepository;
     private final UserService userService;
-    //private final VacationBalanceService vacationBalanceService;
     private final RequestListener requestListener;
     private final RequestMapper requestMapper;
+    private final LogService logService;
 
     @Override
     @Transactional
@@ -60,6 +60,7 @@ public class RequestServiceImpl implements RequestService {
     @Transactional
     public void approveRequest(String userEmail, UUID technicalId) {
         UserEntity approver = findUserByEmailOrThrow(userEmail);
+        logService.logApprovalAttempt(technicalId, approver.getUserId(), "APPROVE");
 
         RequestEntity request = requestRepository.findByTechnicalId(technicalId)
                 .orElseThrow(() -> new EntityNotFoundException("Request not found with technical ID: " + technicalId));
@@ -70,11 +71,15 @@ public class RequestServiceImpl implements RequestService {
     @Override
     @Transactional
     public void rejectRequest(String userEmail, UUID technicalId) {
+        UserEntity performer = findUserByEmailOrThrow(userEmail);
+        logService.logApprovalAttempt(technicalId, performer.getUserId(), "REJECT");
+
         RequestEntity request = requestRepository.findByTechnicalId(technicalId)
                 .orElseThrow(() -> new EntityNotFoundException("Request not found with technical ID: " + technicalId));
 
         request.reject();
         requestListener.increaseRemainder(request.getUser(), request);
+
     }
 
     @Override
@@ -126,9 +131,6 @@ public class RequestServiceImpl implements RequestService {
         return user;
     }
 
-    private void updateVacationBalance(UserEntity user, RequestEntity request) {
-
-    }
 
     private boolean hasOverlappingRequests(RequestEntity requestEntity) {
 

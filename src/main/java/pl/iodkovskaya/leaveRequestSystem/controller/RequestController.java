@@ -5,10 +5,8 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-//import pl.iodkovskaya.leaveRequestSystem.model.dto.ChangeStatusDto;
 import pl.iodkovskaya.leaveRequestSystem.model.dto.RequestDto;
 import pl.iodkovskaya.leaveRequestSystem.model.dto.RequestResponseDto;
 import pl.iodkovskaya.leaveRequestSystem.service.RequestService;
@@ -16,8 +14,6 @@ import pl.iodkovskaya.leaveRequestSystem.service.RequestService;
 import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.UUID;
-
-import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
 
 @AllArgsConstructor
 @RestController
@@ -28,7 +24,7 @@ public class RequestController {
     @PostMapping("/new")
     public ResponseEntity<UUID> createLeaveRequest(@AuthenticationPrincipal UserDetails currentUser,
                                                    @Valid @RequestBody RequestDto leaveRequestDto) {
-        UUID requestId = requestService.createLeaveRequest(((User) currentUser).getUsername(), leaveRequestDto);
+        UUID requestId = requestService.createLeaveRequest(currentUser.getUsername(), leaveRequestDto);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(requestId);
     }
@@ -36,14 +32,14 @@ public class RequestController {
     @PatchMapping("/approve")
     public ResponseEntity<String> approveRequest(@AuthenticationPrincipal UserDetails currentUser,
                                                  @RequestParam UUID technicalId) throws AccessDeniedException {
-        requestService.approveRequest(((User) currentUser).getUsername(), technicalId);
+        requestService.approveRequest(currentUser.getUsername(), technicalId);
         return ResponseEntity.status(HttpStatus.OK).body("Request has been approved");
     }
 
     @PatchMapping("/reject")
     public ResponseEntity<String> rejectRequest(@AuthenticationPrincipal UserDetails currentUser,
                                                 @RequestParam UUID technicalId) throws AccessDeniedException {
-        requestService.rejectRequest(((User) currentUser).getUsername(), technicalId);
+        requestService.rejectRequest(currentUser.getUsername(), technicalId);
         return ResponseEntity.status(HttpStatus.OK).body("Request has been rejected");
     }
 
@@ -61,12 +57,13 @@ public class RequestController {
 
     @GetMapping("/all-for-user")
     public List<RequestResponseDto> getAllRequestsByUserId(@AuthenticationPrincipal UserDetails currentUser) {
-        String username = ((User) currentUser).getUsername();
+        String username = currentUser.getUsername();
         return requestService.getRequestsByUser(username);
     }
+
     @GetMapping("/to-approve")
     public List<RequestResponseDto> getAllRequestsToApprove(@AuthenticationPrincipal UserDetails currentUser) {
-        String username = ((User) currentUser).getUsername();
+        String username = currentUser.getUsername();
         return requestService.getAllRequestsToApprove(username);
     }
 }

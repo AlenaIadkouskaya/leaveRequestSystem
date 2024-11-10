@@ -12,6 +12,7 @@ import pl.iodkovskaya.leaveRequestSystem.exception.StatusException;
 import pl.iodkovskaya.leaveRequestSystem.mapper.RequestMapper;
 import pl.iodkovskaya.leaveRequestSystem.model.dto.RequestDto;
 import pl.iodkovskaya.leaveRequestSystem.model.dto.RequestResponseDto;
+import pl.iodkovskaya.leaveRequestSystem.model.entity.ApprovalLogEntity;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.enums.RequestStatus;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.request.RequestEntity;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.role.RoleEntity;
@@ -20,6 +21,7 @@ import pl.iodkovskaya.leaveRequestSystem.reposityry.RequestRepository;
 
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -33,6 +35,7 @@ public class RequestServiceTests {
     private final RequestRepository requestRepository = Mockito.mock(RequestRepository.class);
     private final UserService userService = Mockito.mock(UserService.class);
     private final RequestListener requestListner = Mockito.mock(RequestListener.class);
+    private final LogService logService = Mockito.mock(LogService.class);
     @InjectMocks
     private RequestServiceImpl requestService;
     private final UserEntity mockUser = Mockito.mock(UserEntity.class);
@@ -172,7 +175,9 @@ public class RequestServiceTests {
         // given
         UUID technicalId = UUID.randomUUID();
         String userEmail = "user@example.com";
+        UserEntity performer = new UserEntity(1L, userEmail);
         RequestEntity request = new RequestEntity(new UserEntity(), RequestStatus.PENDING, LocalDate.now(), LocalDate.now().plusDays(5));
+        when(userService.findUserByEmail(userEmail)).thenReturn(performer);
         when(requestRepository.findByTechnicalId(technicalId)).thenReturn(Optional.of(request));
 
         // when
@@ -203,7 +208,9 @@ public class RequestServiceTests {
         RequestEntity request = new RequestEntity(new UserEntity(), RequestStatus.REJECTED, LocalDate.now(), LocalDate.now().plusDays(5));
         UUID technicalId = UUID.randomUUID();
         String userEmail = "user@example.com";
+        UserEntity performer = new UserEntity(1L, userEmail);
         when(requestRepository.findByTechnicalId(technicalId)).thenReturn(Optional.of(request));
+        when(userService.findUserByEmail(userEmail)).thenReturn(performer);
 
         // when
         Executable e = () -> requestService.rejectRequest(userEmail, technicalId);
@@ -416,4 +423,5 @@ public class RequestServiceTests {
         assertThat(result.get(0).getStartDate()).isEqualTo(request2.getStartDate());
         assertThat(result.get(1).getEndDate()).isEqualTo(request1.getEndDate());
     }
+
 }

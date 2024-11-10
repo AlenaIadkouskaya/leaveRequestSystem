@@ -3,6 +3,7 @@ package pl.iodkovskaya.leaveRequestSystem.model.entity.request;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import pl.iodkovskaya.leaveRequestSystem.exception.InvalidOperationException;
 import pl.iodkovskaya.leaveRequestSystem.exception.StatusException;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.enums.RequestStatus;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.role.RoleEntity;
@@ -10,6 +11,7 @@ import pl.iodkovskaya.leaveRequestSystem.model.entity.user.UserEntity;
 
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -81,14 +83,15 @@ public class RequestEntity {
 
     public void approve(UserEntity approver) {
         ensureRequestNotRejected();
+        ensureRequestNotApproved();
+        if (approvers.isEmpty()) {
+            updateStatus(RequestStatus.PENDING);
+        }
         approvers.add(approver);
 
         if (isFullyApproved()) {
             updateStatus(RequestStatus.APPROVED);
-        } else if (!approvers.isEmpty()) {
-            updateStatus(RequestStatus.PENDING);
         }
-
     }
 
     public void reject() {
@@ -102,6 +105,11 @@ public class RequestEntity {
             throw new StatusException("This request is already rejected!");
         }
     }
+    private void ensureRequestNotApproved() {
+        if (this.status == RequestStatus.APPROVED) {
+            throw new StatusException("This request is already approved!");
+        }
+    }
 
     private static Set<String> getListRequiredApprovalRoles() {
         return Set.of("ROLE_HR", "ROLE_MANAGER");
@@ -109,12 +117,24 @@ public class RequestEntity {
 
     private boolean isFullyApproved() {
         Set<String> requiredRoles = getListRequiredApprovalRoles();
-        Set<String> approverRoles = approvers.stream()
+        List<String> approverRoles = approvers.stream()
                 .map(UserEntity::getRole)
                 .map(RoleEntity::getRoleName)
-                .collect(Collectors.toSet());
-        return approverRoles.containsAll(requiredRoles);
+                .collect(Collectors.toList());
+        if (approverRoles.size() != requiredRoles.size()) {
+            return false;
+        }
+        if (approverRoles.containsAll(requiredRoles)) {
+            return true;
+        }
+
+        String missingRoles = requiredRoles.stream()
+                .filter(role -> !approverRoles.contains(role))
+                .collect(Collectors.joining(", "));
+
+        String currentRoles = String.join(", ", approverRoles);
+        throw new InvalidOperationException(
+                "Action rejected. Missing roles: " + missingRoles + ". Current roles: " + currentRoles
+        );
     }
-
-
 }
