@@ -1,6 +1,7 @@
 package pl.iodkovskaya.leaveRequestSystem.service;
 
 import jakarta.persistence.EntityNotFoundException;
+import nl.altindag.log.LogCaptor;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
@@ -16,7 +17,11 @@ import pl.iodkovskaya.leaveRequestSystem.model.entity.vacationbalance.VacationBa
 import pl.iodkovskaya.leaveRequestSystem.reposityry.VacationBalanceRepository;
 
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
+
+import org.slf4j.Logger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -27,8 +32,13 @@ public class VacationBalanceServiceTests {
 
     private final UserService userService = Mockito.mock(UserService.class);
     private final VacationBalanceRepository vacationBalanceRepository = Mockito.mock(VacationBalanceRepository.class);
+    private final Logger logger = Mockito.mock(Logger.class);
     @InjectMocks
     private VacationBalanceServiceImpl vacationBalanceService;
+    //@Mock
+    //private static final Logger logger = LoggerFactory.getLogger(VacationBalanceServiceImpl.class);
+    //private final Logger logger = Mockito.mock(LoggerFactory.getLogger(VacationBalanceServiceImpl.class));
+
 
     @Test
     public void should_create_vacation_balance_entity_with_success() {
@@ -133,5 +143,65 @@ public class VacationBalanceServiceTests {
         verify(vacationBalanceRepository, times(1)).findByUser(userEntity);
     }
 
+    @Test
+    void should_increment_vacation_days_monthly_successfully() {
+        LogCaptor logCaptor = LogCaptor.forClass(VacationBalanceServiceImpl.class);
 
+        // given
+        VacationBalanceEntity balance1 = mock(VacationBalanceEntity.class);
+        when(balance1.getUser()).thenReturn(new UserEntity(1L, "user_1@gmail.com"));
+
+        VacationBalanceEntity balance2 = mock(VacationBalanceEntity.class);
+        when(balance2.getUser()).thenReturn(new UserEntity(2L, "user_2@gmail.com"));
+
+        List<VacationBalanceEntity> balances = Arrays.asList(balance1, balance2);
+        when(vacationBalanceRepository.findAll()).thenReturn(balances);
+
+        // when
+        vacationBalanceService.incrementVacationDaysMonthly();
+
+        // then
+        verify(balance1, times(1)).incrementTotalDays(any(Integer.class));
+        verify(balance2, times(1)).incrementTotalDays(any(Integer.class));
+        verify(vacationBalanceRepository, times(2)).save(any(VacationBalanceEntity.class));
+
+        List<String> logs = logCaptor.getInfoLogs();
+        assertThat(logs.size()).isEqualTo(2);
+        assertThat(logs.get(0)).contains("Successfully updated vacation balance for user with ID: 1");
+        assertThat(logs.get(1)).contains("Successfully updated vacation balance for user with ID: 2");
+    }
+
+    @Test
+    void should_get_failure_when_increment_vacation_days_monthly_and_threw_exception() {
+        LogCaptor logCaptor = LogCaptor.forClass(VacationBalanceServiceImpl.class);
+
+        // given
+        VacationBalanceEntity balance1 = mock(VacationBalanceEntity.class);
+        when(balance1.getUser()).thenReturn(new UserEntity(1L, "user_1@gmail.com"));
+
+        VacationBalanceEntity balance2 = mock(VacationBalanceEntity.class);
+        when(balance2.getUser()).thenReturn(new UserEntity(2L, "user_2@gmail.com"));
+
+        List<VacationBalanceEntity> balances = Arrays.asList(balance1, balance2);
+        when(vacationBalanceRepository.findAll()).thenReturn(balances);
+        doThrow(new RuntimeException("Error incrementing days")).when(balance2).incrementTotalDays(any(Integer.class));
+
+        // when
+        vacationBalanceService.incrementVacationDaysMonthly();
+
+        // then
+        verify(balance1, times(1)).incrementTotalDays(any(Integer.class));
+        verify(vacationBalanceRepository, times(1)).save(balance1);
+        verify(balance2, times(1)).incrementTotalDays(any(Integer.class));
+        verify(vacationBalanceRepository, times(0)).save(balance2);
+
+        List<String> errorLogs = logCaptor.getErrorLogs();
+        assertThat(errorLogs.size()).isEqualTo(1);
+        assertThat(errorLogs.get(0)).contains("Failed to update vacation balance for user with ID: 2")
+                .contains("Error incrementing days");
+
+        List<String> infoLogs = logCaptor.getInfoLogs();
+        assertThat(infoLogs.size()).isEqualTo(1);
+        assertThat(infoLogs.get(0)).contains("Successfully updated vacation balance for user with ID: 1");
+    }
 }
