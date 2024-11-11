@@ -3,6 +3,7 @@ package pl.iodkovskaya.leaveRequestSystem.model.entity.user;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import pl.iodkovskaya.leaveRequestSystem.exception.InvalidOperationException;
 import pl.iodkovskaya.leaveRequestSystem.exception.RoleExistException;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.role.RoleEntity;
@@ -53,14 +54,15 @@ public class UserEntity {
 
     @PreRemove
     public void checkIfUserCanBeRemoved() {
-        if (requests == null || requests.isEmpty()) {
-            requests = new HashSet<>(); // Явно загружаем запросы
-        }
-        boolean isApprover = requests.stream()
-                .anyMatch(request -> request.getApprovers().contains(this));
-        if (isApprover) {
-            throw new InvalidOperationException("Cannot delete user because they are an approver in an existing request.");
-        }
+
+//        if (requests == null || requests.isEmpty()) {
+//            requests = new HashSet<>();
+//        }
+//        boolean isApprover = requests.stream()
+//                .anyMatch(request -> request.getApprovers().contains(this));
+//        if (isApprover) {
+//            throw new InvalidOperationException("Cannot delete user because they are an approver in an existing request.");
+//        }
     }
 
     public UserEntity(String username, String passwordHash, String lastName, String firstName, String email, RoleEntity role, boolean enabled) {

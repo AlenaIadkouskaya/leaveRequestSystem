@@ -42,6 +42,8 @@ public class RequestServiceIntegrationTests {
     private RoleRepository roleRepository;
     @Autowired
     private ApprovalLogRepository approvalLogRepository;
+    @Autowired
+    private UserService userService;
 
     @BeforeEach
     void setUp() {
@@ -154,7 +156,7 @@ public class RequestServiceIntegrationTests {
         requestRepository.save(request);
 
         // when
-        Executable e = () -> userRepository.delete(user2);
+        Executable e = () -> userService.deleteUser(user2.getUserId());
 
         // then
         RequestEntity savedRequest = requestRepository.findById(request.getId()).get();

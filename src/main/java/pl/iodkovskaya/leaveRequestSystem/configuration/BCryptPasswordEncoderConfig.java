@@ -12,12 +12,9 @@ import javax.sql.DataSource;
 public class BCryptPasswordEncoderConfig {
     private final DataSource dataSource;
 
-//    @Bean
-//    public UserDetailsManager userDetailsManager() {
-//        return new JdbcUserDetailsManager(dataSource);
-//    }
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
 }

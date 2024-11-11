@@ -18,4 +18,6 @@ public interface UserService {
     UserEntity findUserById(Long id);
 
     void addRoleToUser(String email, String roleName, UserDetails currentUser) throws AccessDeniedException;
+
+    void deleteUser(Long userId);
 }

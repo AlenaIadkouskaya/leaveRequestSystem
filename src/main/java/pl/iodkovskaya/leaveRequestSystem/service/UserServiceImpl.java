@@ -6,6 +6,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import pl.iodkovskaya.leaveRequestSystem.exception.InvalidOperationException;
 import pl.iodkovskaya.leaveRequestSystem.exception.UserAlreadyExistsException;
 import pl.iodkovskaya.leaveRequestSystem.model.dto.UserDto;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.role.RoleEntity;
@@ -21,6 +22,14 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final RoleService roleService;
     private final PasswordEncoder passwordEncoder;
+
+    @Override
+    public void deleteUser(Long userId) {
+        if (userRepository.existsApprovingRequestByUserId(userId)) {
+            throw new InvalidOperationException("Cannot delete user because they are an approver in an existing request.");
+        }
+        userRepository.deleteById(userId);
+    }
 
     @Override
     public void registerOAuth2User(String login) {

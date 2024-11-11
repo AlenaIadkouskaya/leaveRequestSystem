@@ -36,4 +36,12 @@ public class UserController {
 
         return ResponseEntity.status(HttpStatus.OK).body("Role has changed successfully");
     }
+
+    @DeleteMapping("/delete/{userId}")
+    public ResponseEntity<String> deleteUser(@PathVariable Long userId) {
+
+        userService.deleteUser(userId);
+
+        return ResponseEntity.status(HttpStatus.OK).body("User deleted successfully");
+    }
 }
