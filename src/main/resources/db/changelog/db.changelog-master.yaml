@@ -9,3 +9,5 @@ databaseChangeLog:
       file: db/changelog/changeset/create-table-vacation-balances.yaml
   - include:
       file: db/changelog/changeset/create-table-requests.yaml
+  - include:
+      file: db/changelog/changeset/create-session-table.yaml

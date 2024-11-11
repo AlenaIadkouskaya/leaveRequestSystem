@@ -8,10 +8,6 @@ spring:
     password: <YOUR_PASSWORD>>
     url: jdbc:postgresql://localhost:8081/vacations
     driver-class-name: org.postgresql.Driver
-#    initialization-mode: embedded
-#  h2:
-#    console:
-#      enabled: true
   jpa:
     hibernate:
       ddl-auto: update
@@ -20,7 +16,8 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         show-sql: true
-    defer-datasource-initialization=true:
+#    defer-datasource-initialization: true
+
   profiles:
     include: local
   security:

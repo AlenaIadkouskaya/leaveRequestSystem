@@ -23,7 +23,6 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @EnableMethodSecurity
 public class SecurityConfig {
     private final CustomOAuth2AuthenticationSuccessHandler successHandler;
-    //private final UserDetailsService userDetailsService;
     private final CustomUserDetailsService customUserDetailsService;
     private final PasswordEncoder passwordEncoder;
 
