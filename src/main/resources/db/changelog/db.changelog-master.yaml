@@ -1,7 +1,11 @@
 databaseChangeLog:
   - include:
-      file: db/changelog/changeset/create-table-authorities.yaml
+      file: db/changelog/changeset/create-table-users.yaml
   - include:
       file: db/changelog/changeset/insert-authorities.yaml
-#  - include:
-#      file: db/changelog/changeset/insert-user-with-role-manager-.yaml
+  - include:
+      file: db/changelog/changeset/insert-user-with-role-manager-.yaml
+  - include:
+      file: db/changelog/changeset/create-table-vacation-balances.yaml
+  - include:
+      file: db/changelog/changeset/create-table-requests.yaml

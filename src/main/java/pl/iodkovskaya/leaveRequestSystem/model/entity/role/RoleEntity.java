@@ -22,7 +22,7 @@ public class RoleEntity {
     @Column(name = "role_name", nullable = false, length = 50)
     private String roleName;
 
-    @OneToMany(mappedBy = "role", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "role")
     private Set<UserEntity> users;
 
     public RoleEntity(String roleName, Set<UserEntity> users) {

@@ -1,7 +1,7 @@
 databaseChangeLog:
   - changeSet:
       id: 2
-      author: author
+      author: Alena Iadkouskaya
       changes:
         - insert:
             tableName: users
@@ -26,4 +26,4 @@ databaseChangeLog:
                   value: "true"
               - column:
                   name: role_id
-                  value: "3"  # Предполагается, что role_id для "ROLE_MANAGER" будет 2
+                  value: "3"

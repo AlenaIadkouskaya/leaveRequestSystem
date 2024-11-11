@@ -5,6 +5,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import pl.iodkovskaya.leaveRequestSystem.exception.RoleExistException;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.role.RoleEntity;
+import pl.iodkovskaya.leaveRequestSystem.model.entity.request.RequestEntity;
+import pl.iodkovskaya.leaveRequestSystem.model.entity.vacationbalance.VacationBalanceEntity;
+
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -31,9 +35,15 @@ public class UserEntity {
     @Column(name = "email", nullable = false, unique = true, length = 100)
     private String email;
 
-    @ManyToOne
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
+    private Set<RequestEntity> requests;
+
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "role_id", foreignKey = @ForeignKey(name = "fk_role"))
+
     private RoleEntity role;
+    @OneToOne(mappedBy = "user", cascade = CascadeType.REMOVE)
+    private VacationBalanceEntity vacationBalance;
 
     private boolean enabled;
     @Version

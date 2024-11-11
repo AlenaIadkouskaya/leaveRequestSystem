@@ -29,7 +29,7 @@ public class RequestEntity {
     @Column(name = "technical_id", nullable = false, unique = true)
     private UUID technicalId;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private UserEntity user;
 
@@ -45,7 +45,7 @@ public class RequestEntity {
     @Version
     private Long version;
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.REMOVE)
     @JoinTable(
             name = "request_approvers",
             joinColumns = @JoinColumn(name = "request_id"),

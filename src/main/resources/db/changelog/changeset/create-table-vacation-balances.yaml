@@ -1,0 +1,61 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: Alena Iadkouskaya
+      changes:
+        - createTable:
+            tableName: vacation_balances
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: total_days
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: used_days
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: remaining_days
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: version
+                  type: BIGINT
+                  constraints:
+                    nullable: true
+
+  - changeSet:
+      id: 2
+      author: Alena Iadkouskaya
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: vacation_balances
+            baseColumnNames: user_id
+            constraintName: fk_vacation_balance_user
+            referencedTableName: users
+            referencedColumnNames: user_id
+            onDelete: CASCADE
+
+  - changeSet:
+      id: 3
+      author: Alena Iadkouskaya
+      changes:
+        - addUniqueConstraint:
+            tableName: vacation_balances
+            columnNames: user_id
+            constraintName: unique_user_vacation_balance

@@ -1,0 +1,103 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: Alena Iadkouskaya
+      changes:
+        - createTable:
+            tableName: requests
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: technical_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: user_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: start_date
+                  type: DATE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: end_date
+                  type: DATE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: version
+                  type: BIGINT
+                  constraints:
+                    nullable: true
+
+  - changeSet:
+      id: 2
+      author: Alena Iadkouskaya
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: requests
+            baseColumnNames: user_id
+            constraintName: fk_request_user
+            referencedTableName: users
+            referencedColumnNames: user_id
+            onDelete: CASCADE
+
+  - changeSet:
+      id: 3
+      author: Alena Iadkouskaya
+      changes:
+        - createTable:
+            tableName: request_approvers
+            columns:
+              - column:
+                  name: request_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+        - addPrimaryKey:
+            tableName: request_approvers
+            columnNames: request_id, user_id
+
+  - changeSet:
+      id: 4
+      author: Alena Iadkouskaya
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: request_approvers
+            baseColumnNames: request_id
+            constraintName: fk_request_approver_request
+            referencedTableName: requests
+            referencedColumnNames: id
+            onDelete: CASCADE
+
+  - changeSet:
+      id: 5
+      author: Alena Iadkouskaya
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: request_approvers
+            baseColumnNames: user_id
+            constraintName: fk_request_approver_user
+            referencedTableName: users
+            referencedColumnNames: user_id
+            onDelete: CASCADE
