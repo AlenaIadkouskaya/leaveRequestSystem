@@ -42,6 +42,8 @@ public class RequestEntity {
 
     @Column(name = "end_date", nullable = false)
     private LocalDate endDate;
+    @Version
+    private Long version;
 
     @ManyToMany
     @JoinTable(

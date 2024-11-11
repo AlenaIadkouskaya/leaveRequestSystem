@@ -30,6 +30,9 @@ public class VacationBalanceEntity {
     @Column(name = "remaining_days", nullable = false)
     private Integer remainingDays;
 
+    @Version
+    private Long version;
+
     public VacationBalanceEntity(UserEntity user, Integer totalDays, Integer usedDays) {
         this.user = user;
         this.totalDays = totalDays;
@@ -38,7 +41,14 @@ public class VacationBalanceEntity {
     }
 
     protected VacationBalanceEntity() {
+    }
 
+    public VacationBalanceEntity(Long id, UserEntity user, Integer totalDays, Integer usedDays, Integer remainingDays) {
+        this.id = id;
+        this.user = user;
+        this.totalDays = totalDays;
+        this.usedDays = usedDays;
+        this.remainingDays = remainingDays;
     }
 
     public void updateRemainderDays() {

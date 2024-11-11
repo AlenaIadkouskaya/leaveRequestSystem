@@ -36,6 +36,8 @@ public class UserEntity {
     private RoleEntity role;
 
     private boolean enabled;
+    @Version
+    private Long version;
 
     public UserEntity(String username, String passwordHash, String lastName, String firstName, String email, RoleEntity role, boolean enabled) {
         this.username = username;
