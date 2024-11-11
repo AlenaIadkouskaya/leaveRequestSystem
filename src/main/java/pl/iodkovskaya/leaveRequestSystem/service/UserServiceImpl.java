@@ -1,11 +1,14 @@
 package pl.iodkovskaya.leaveRequestSystem.service;
 
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.PersistenceContext;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import pl.iodkovskaya.leaveRequestSystem.exception.InvalidOperationException;
 import pl.iodkovskaya.leaveRequestSystem.exception.UserAlreadyExistsException;
 import pl.iodkovskaya.leaveRequestSystem.model.dto.UserDto;
@@ -22,6 +25,8 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final RoleService roleService;
     private final PasswordEncoder passwordEncoder;
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Override
     public void deleteUser(Long userId) {
@@ -32,8 +37,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public void registerOAuth2User(String login) {
-        userRepository.save(new UserEntity(login, "", "", "", "", roleService.findRoleByName("ROLE_USER"), true));
+        try {
+            RoleEntity role = roleService.findRoleByName("ROLE_USER");
+            userRepository.save(new UserEntity(login, "", "", "", "", role, true));
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     @Override
