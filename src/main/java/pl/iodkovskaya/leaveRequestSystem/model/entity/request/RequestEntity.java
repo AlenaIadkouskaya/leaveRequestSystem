@@ -30,7 +30,7 @@ public class RequestEntity {
     private UUID technicalId;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "FK_requests_user"))
     private UserEntity user;
 
     @Enumerated(EnumType.STRING)

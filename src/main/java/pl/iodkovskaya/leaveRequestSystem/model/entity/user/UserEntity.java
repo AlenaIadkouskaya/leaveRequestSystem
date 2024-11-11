@@ -3,11 +3,13 @@ package pl.iodkovskaya.leaveRequestSystem.model.entity.user;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import pl.iodkovskaya.leaveRequestSystem.exception.InvalidOperationException;
 import pl.iodkovskaya.leaveRequestSystem.exception.RoleExistException;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.role.RoleEntity;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.request.RequestEntity;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.vacationbalance.VacationBalanceEntity;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -35,19 +37,31 @@ public class UserEntity {
     @Column(name = "email", nullable = false, unique = true, length = 100)
     private String email;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
-    private Set<RequestEntity> requests;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private Set<RequestEntity> requests = new HashSet<>();
 
     @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "role_id", foreignKey = @ForeignKey(name = "fk_role"))
 
     private RoleEntity role;
-    @OneToOne(mappedBy = "user", cascade = CascadeType.REMOVE)
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private VacationBalanceEntity vacationBalance;
 
     private boolean enabled;
     @Version
     private Long version;
+
+    @PreRemove
+    public void checkIfUserCanBeRemoved() {
+        if (requests == null || requests.isEmpty()) {
+            requests = new HashSet<>(); // Явно загружаем запросы
+        }
+        boolean isApprover = requests.stream()
+                .anyMatch(request -> request.getApprovers().contains(this));
+        if (isApprover) {
+            throw new InvalidOperationException("Cannot delete user because they are an approver in an existing request.");
+        }
+    }
 
     public UserEntity(String username, String passwordHash, String lastName, String firstName, String email, RoleEntity role, boolean enabled) {
         this.username = username;

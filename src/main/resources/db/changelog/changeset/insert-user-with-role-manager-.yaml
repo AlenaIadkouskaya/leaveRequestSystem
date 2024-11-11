@@ -11,7 +11,7 @@ databaseChangeLog:
                   value: "user_manager"
               - column:
                   name: password_hash
-                  value: "$2b$12$vsxs24RQZeg7NRcSywuDyuCb6Oh0dTcrTpMEmKgJA10AIlCkuGtXy"
+                  value: "$2a$10$LCpMqFG1CYINEuZ6dD7.m.kmWAdJ.Yz.Cwn3kES/5J8fqWi1jVZDS"
               - column:
                   name: first_name
                   value: "manager"
@@ -27,3 +27,6 @@ databaseChangeLog:
               - column:
                   name: role_id
                   value: "3"
+              - column:
+                  name: version
+                  value: 0

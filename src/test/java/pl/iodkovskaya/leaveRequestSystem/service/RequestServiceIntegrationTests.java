@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
+import pl.iodkovskaya.leaveRequestSystem.exception.InvalidOperationException;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.ApprovalLogEntity;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.enums.RequestStatus;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.request.RequestEntity;
@@ -41,19 +42,10 @@ public class RequestServiceIntegrationTests {
     private RoleRepository roleRepository;
     @Autowired
     private ApprovalLogRepository approvalLogRepository;
-    private final RoleEntity ROLE = new RoleEntity(1L, "ROLE_USER", new HashSet<>());
-    @Autowired
-    private DataSource dataSource;
-
-    @Test
-    public void testDatasource() {
-        assertNotNull(dataSource);
-    }
 
     @BeforeEach
     void setUp() {
         requestRepository.deleteAll();
-        roleRepository.save(ROLE);
     }
 
     @Test
@@ -62,8 +54,8 @@ public class RequestServiceIntegrationTests {
         // given
         int daysRequested = 5;
         String userEmail = "user@example.com";
-
-        UserEntity user = new UserEntity("", "", "", "", userEmail, ROLE, true);
+        RoleEntity role = new RoleEntity("ROLE_USER", new HashSet<>());
+        UserEntity user = new UserEntity("", "", "", "", userEmail, role, true);
         userRepository.save(user);
 
 
@@ -93,7 +85,6 @@ public class RequestServiceIntegrationTests {
         UUID testRequestId = UUID.randomUUID();
         String testUserEmail = "userTest@example.com";
         RoleEntity roleEntity = new RoleEntity("admin");
-        roleRepository.save(roleEntity);
         UserEntity user = new UserEntity("login", "1", "first", "last", testUserEmail, roleEntity, true);
         userRepository.save(user);
 
@@ -107,13 +98,13 @@ public class RequestServiceIntegrationTests {
         assertThat(logEntry.getRequestId()).isEqualTo(testRequestId);
         assertThat(logEntry.getAction()).isEqualTo("REJECT");
     }
+
     @Test
     void should_execute_inner_transaction_when_request_needs_to_approve_but_request_with_this_id_not_found() {
         // given
         UUID testRequestId = UUID.randomUUID();
         String testUserEmail = "test_user@example.com";
         RoleEntity roleEntity = new RoleEntity("admin");
-        roleRepository.save(roleEntity);
         UserEntity user = new UserEntity("login", "1", "first", "last", testUserEmail, roleEntity, true);
         userRepository.save(user);
 
@@ -127,4 +118,48 @@ public class RequestServiceIntegrationTests {
         assertThat(logEntry.getRequestId()).isEqualTo(testRequestId);
         assertThat(logEntry.getAction()).isEqualTo("APPROVE");
     }
+
+    @Test
+    @Transactional
+    public void should_cascade_delete_approvers_when_request_deleted() {
+        // given
+        UserEntity user1 = new UserEntity("user1@mail.com", "password", "LastName", "FirstName", "user1@mail.com", new RoleEntity("ROLE_USER"), true);
+        UserEntity user2 = new UserEntity("user2@mail.com", "password", "LastName", "FirstName", "user2@mail.com", new RoleEntity("ROLE_MANAGER"), true);
+        userRepository.save(user1);
+        userRepository.save(user2);
+
+        RequestEntity request = new RequestEntity(user1, RequestStatus.CREATED, LocalDate.now(), LocalDate.now().plusDays(5));
+        request.getApprovers().add(user2);
+        requestRepository.save(request);
+
+        // when
+        requestRepository.delete(request);
+
+        // then
+        RequestEntity deletedRequest = requestRepository.findById(request.getId()).orElse(null);
+        assertThat(deletedRequest).isNull();
+    }
+
+    @Test
+    @Transactional
+    public void should_throw_exception_when_exists_reruest_with_approver_that_is_deletin() {
+        // given
+        UserEntity user1 = new UserEntity("user1@mail.com", "password", "LastName", "FirstName", "user1@mail.com", new RoleEntity("ROLE_USER"), true);
+        UserEntity user2 = new UserEntity("user2@mail.com", "password", "LastName", "FirstName", "user2@mail.com", new RoleEntity("ROLE_MANAGER"), true);
+        userRepository.save(user1);
+        userRepository.save(user2);
+
+        RequestEntity request = new RequestEntity(user1, RequestStatus.CREATED, LocalDate.now(), LocalDate.now().plusDays(5));
+        request.getApprovers().add(user2);
+        requestRepository.save(request);
+
+        // when
+        Executable e = () -> userRepository.delete(user2);
+
+        // then
+        RequestEntity savedRequest = requestRepository.findById(request.getId()).get();
+        assertThat(savedRequest.getApprovers()).contains(user2);
+        assertThrows(InvalidOperationException.class, e);
+    }
+
 }

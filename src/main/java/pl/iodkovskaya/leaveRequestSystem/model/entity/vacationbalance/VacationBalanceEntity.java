@@ -18,7 +18,7 @@ public class VacationBalanceEntity {
     private Long id;
 
     @OneToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(name = "FK_vacation_balance_user"))
     private UserEntity user;
 
     @Column(name = "total_days", nullable = false)
