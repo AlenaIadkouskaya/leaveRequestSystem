@@ -41,7 +41,7 @@ public class UserServiceImpl implements UserService {
     public void registerOAuth2User(String login) {
         try {
             RoleEntity role = roleService.findRoleByName("ROLE_USER");
-            userRepository.save(new UserEntity(login, "", "", "", "", role, true));
+            userRepository.save(new UserEntity(login, "", "", "", login, role, true));
         } catch (Exception e) {
             throw new RuntimeException("Transaction failed while registering new user", e);
         }
