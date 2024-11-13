@@ -12,7 +12,6 @@ import pl.iodkovskaya.leaveRequestSystem.exception.StatusException;
 import pl.iodkovskaya.leaveRequestSystem.mapper.RequestMapper;
 import pl.iodkovskaya.leaveRequestSystem.model.dto.RequestDto;
 import pl.iodkovskaya.leaveRequestSystem.model.dto.RequestResponseDto;
-import pl.iodkovskaya.leaveRequestSystem.model.entity.ApprovalLogEntity;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.enums.RequestStatus;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.request.RequestEntity;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.role.RoleEntity;
@@ -21,7 +20,6 @@ import pl.iodkovskaya.leaveRequestSystem.reposityry.RequestRepository;
 
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -168,6 +166,24 @@ public class RequestServiceTests {
         // then
         verify(request).approve(approver);
         verify(requestRepository).findByTechnicalId(technicalId);
+    }
+
+    @Test
+    void should_throw_exception_before_approval_when_request_is_approved() {
+        // given
+        String userEmail = "test@example.com";
+        UserEntity approver = new UserEntity();
+        UUID technicalId = UUID.randomUUID();
+        RequestEntity request = new RequestEntity(new UserEntity(), RequestStatus.APPROVED, LocalDate.now(), LocalDate.now().plusDays(1));
+        when(userService.findUserByEmail(userEmail)).thenReturn(approver);
+        when(requestRepository.findByTechnicalId(technicalId)).thenReturn(Optional.of(request));
+        doNothing().when(logService).logApprovalAttempt(technicalId, approver.getUserId(), "APPROVE");
+        // when
+        Executable e = () -> requestService.approveRequest(userEmail, technicalId);
+
+        // then
+        assertThrows(StatusException.class, e);
+        verify(logService, times(1)).logApprovalAttempt(technicalId, approver.getUserId(), "APPROVE");
     }
 
     @Test

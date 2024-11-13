@@ -43,8 +43,8 @@ public class UserEntity {
 
     @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "role_id", foreignKey = @ForeignKey(name = "fk_role"))
-
     private RoleEntity role;
+
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private VacationBalanceEntity vacationBalance;
 

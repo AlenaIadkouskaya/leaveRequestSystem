@@ -12,6 +12,7 @@ import java.time.LocalDate;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class RequestEntityTests {
@@ -144,4 +145,27 @@ public class RequestEntityTests {
         assertThrows(StatusException.class, e);
     }
 
+    @Test
+    void should_throws_exception_when_end_date_is_null() {
+        // given
+        RequestEntity request = new RequestEntity(new UserEntity(), RequestStatus.CREATED, LocalDate.now(), null);
+
+        // when
+        Executable e = () -> request.validateDates();
+
+        // then
+        assertThrows(NullPointerException.class, e);
+    }
+
+    @Test
+    void should_throws_exception_when_end_date_is_before_start_date() {
+        // given
+        RequestEntity request = new RequestEntity(new UserEntity(), RequestStatus.CREATED, LocalDate.of(2024, 11, 10), LocalDate.of(2024, 11, 5));
+
+        // when
+        Executable e = () -> request.validateDates();
+
+        // then
+        assertThrows(IllegalArgumentException.class, e);
+    }
 }

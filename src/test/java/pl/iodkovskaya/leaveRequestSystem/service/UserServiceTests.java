@@ -28,8 +28,6 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTests {
     private final UserRepository userRepository = Mockito.mock(UserRepository.class);
-
-
     private final RoleService roleService = Mockito.mock(RoleService.class);
     private final PasswordEncoder passwordEncoder = Mockito.mock(PasswordEncoder.class);
 
