@@ -56,7 +56,7 @@ public class RequestServiceIntegrationTests {
         // given
         int daysRequested = 5;
         String userEmail = "user@example.com";
-        RoleEntity role = new RoleEntity("ROLE_USER", new HashSet<>());
+        RoleEntity role = new RoleEntity("ROLE_USER");
         UserEntity user = new UserEntity("", "", "", "", userEmail, role, true);
         userRepository.save(user);
 
@@ -107,6 +107,7 @@ public class RequestServiceIntegrationTests {
         UUID testRequestId = UUID.randomUUID();
         String testUserEmail = "test_user@example.com";
         RoleEntity roleEntity = new RoleEntity("admin");
+        //roleRepository.save(roleEntity);
         UserEntity user = new UserEntity("login", "1", "first", "last", testUserEmail, roleEntity, true);
         userRepository.save(user);
 

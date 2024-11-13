@@ -22,13 +22,13 @@ public class RoleEntity {
     @Column(name = "role_name", nullable = false, length = 50)
     private String roleName;
 
-    @OneToMany(mappedBy = "role")
-    private Set<UserEntity> users;
+//    @OneToMany(mappedBy = "role")
+//    private Set<UserEntity> users;
 
-    public RoleEntity(String roleName, Set<UserEntity> users) {
-        this.roleName = roleName;
-        this.users = users;
-    }
+//    public RoleEntity(String roleName, Set<UserEntity> users) {
+//        this.roleName = roleName;
+//        this.users = users;
+//    }
 
     public RoleEntity(String roleName) {
         this.roleName = roleName;

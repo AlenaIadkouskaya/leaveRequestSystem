@@ -39,8 +39,8 @@ public class RequestEntityTests {
     void should_update_status_to_approved_when_all_roles_approve() {
         // given
         RequestEntity request = new RequestEntity();
-        UserEntity approver1 = new UserEntity("", "", "", "", "", new RoleEntity("ROLE_HR", Set.of()), true);
-        UserEntity approver2 = new UserEntity("", "", "", "", "", new RoleEntity("ROLE_MANAGER", Set.of()), true);
+        UserEntity approver1 = new UserEntity("", "", "", "", "", new RoleEntity("ROLE_HR"), true);
+        UserEntity approver2 = new UserEntity("", "", "", "", "", new RoleEntity("ROLE_MANAGER"), true);
 
         // when
         request.approve(approver1);
@@ -55,7 +55,7 @@ public class RequestEntityTests {
     void should_update_status_to_pending_when_only_one_role_approve() {
         // given
         RequestEntity request = new RequestEntity();
-        UserEntity approver1 = new UserEntity("", "", "", "", "", new RoleEntity("ROLE_HR", Set.of()), true);
+        UserEntity approver1 = new UserEntity("", "", "", "", "", new RoleEntity("ROLE_HR"), true);
 
         // when
         request.approve(approver1);
@@ -70,7 +70,7 @@ public class RequestEntityTests {
         // given
         RequestEntity request = new RequestEntity();
         request.updateStatus(RequestStatus.REJECTED);
-        UserEntity approver1 = new UserEntity("", "", "", "", "", new RoleEntity("ROLE_HR", Set.of()), true);
+        UserEntity approver1 = new UserEntity("", "", "", "", "", new RoleEntity("ROLE_HR"), true);
 
         // when
         Executable e = () -> request.approve(approver1);
@@ -122,7 +122,7 @@ public class RequestEntityTests {
     public void should_clear_approvers_when_status_changed_to_reject() {
         // given
         RequestEntity request = new RequestEntity(new UserEntity(), RequestStatus.PENDING, LocalDate.now(), LocalDate.now().plusDays(5));
-        UserEntity approver = new UserEntity("", "", "", "", "", new RoleEntity("ROLE_HR", Set.of()), true);
+        UserEntity approver = new UserEntity("", "", "", "", "", new RoleEntity("ROLE_HR"), true);
         request.approve(approver);
 
         // when
@@ -174,8 +174,8 @@ public class RequestEntityTests {
     void should_throw_exception_when_approver_has_duplicate_roles() {
         // given
         RequestEntity request = new RequestEntity();
-        UserEntity approver1 = new UserEntity("", "", "", "", "", new RoleEntity("ROLE_HR", Set.of()), true);
-        UserEntity approver2 = new UserEntity("", "", "", "", "", new RoleEntity("ROLE_HR", Set.of()), true);
+        UserEntity approver1 = new UserEntity("", "", "", "", "", new RoleEntity("ROLE_HR"), true);
+        UserEntity approver2 = new UserEntity("", "", "", "", "", new RoleEntity("ROLE_HR"), true);
         request.approve(approver1);
 
         // when

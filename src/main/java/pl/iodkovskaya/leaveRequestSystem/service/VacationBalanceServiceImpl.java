@@ -63,8 +63,8 @@ public class VacationBalanceServiceImpl implements VacationBalanceService, Reque
         vacationBalance.decreaseUsedDays(days);
     }
 
-    //@Scheduled(cron = "0 0 0 1 * ?") // co miesiąc
-    @Scheduled(cron = "0 * * * * ?") // co 1 minuta
+    @Scheduled(cron = "0 0 0 1 * ?") // co miesiąc
+    //@Scheduled(cron = "0 * * * * ?") // co 1 minuta
     @Transactional
     @Override
     public void incrementVacationDaysMonthly() {

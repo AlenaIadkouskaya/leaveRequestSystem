@@ -45,7 +45,7 @@ public class RequestEntity {
     @Version
     private Long version;
 
-    @ManyToMany(cascade = CascadeType.REMOVE)
+    @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(
             name = "request_approvers",
             joinColumns = @JoinColumn(name = "request_id"),
@@ -107,6 +107,7 @@ public class RequestEntity {
             throw new StatusException("This request is already rejected!");
         }
     }
+
     private void ensureRequestNotApproved() {
         if (this.status == RequestStatus.APPROVED) {
             throw new StatusException("This request is already approved!");

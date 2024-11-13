@@ -351,7 +351,7 @@ public class RequestServiceTests {
         // given
         RequestResponseDto requestResponseDto = new RequestResponseDto();
         UserEntity approver = new UserEntity("", "", "", "", "",
-                new RoleEntity("ROLE_MANAGER", Set.of()), true);
+                new RoleEntity("ROLE_MANAGER"), true);
 
         RequestEntity request1 = new RequestEntity(mockUser, RequestStatus.PENDING, LocalDate.of(2024, 11, 1),
                 LocalDate.of(2024, 11, 1));
@@ -381,7 +381,7 @@ public class RequestServiceTests {
         // given
         RequestResponseDto requestResponseDto = new RequestResponseDto();
         UserEntity approver = new UserEntity("", "", "", "", "",
-                new RoleEntity("ROLE_MANAGER", Set.of()), true);
+                new RoleEntity("ROLE_MANAGER"), true);
 
         RequestEntity request1 = new RequestEntity(mockUser, RequestStatus.CREATED, LocalDate.of(2024, 11, 1),
                 LocalDate.of(2024, 11, 1));
@@ -409,9 +409,9 @@ public class RequestServiceTests {
     public void should_get_all_requests_to_approve_sorted_by_start_date() {
         // given
         UserEntity approver = new UserEntity("", "", "", "", "",
-                new RoleEntity("ROLE_MANAGER", Set.of()), true);
+                new RoleEntity("ROLE_MANAGER"), true);
         UserEntity approverDone = new UserEntity("", "", "", "", "",
-                new RoleEntity("ROLE_HR", Set.of()), true);
+                new RoleEntity("ROLE_HR"), true);
 
         RequestEntity request1 = new RequestEntity(mockUser, RequestStatus.PENDING, LocalDate.of(2024, 11, 11),
                 LocalDate.of(2024, 11, 11));
