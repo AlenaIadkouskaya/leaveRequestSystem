@@ -1,13 +1,16 @@
 package pl.iodkovskaya.leaveRequestSystem.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import pl.iodkovskaya.leaveRequestSystem.model.dto.VacationBalanceDto;
@@ -23,28 +26,37 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
+@ActiveProfiles("test")
 @AutoConfigureMockMvc
 public class VacationBalanceControllerTests {
     @Autowired
     private MockMvc mockMvc;
+
     @Autowired
     private ObjectMapper objectMapper;
-    @Mock
-    private VacationBalanceService vacationBalanceService;
-    @Autowired
+
+    @MockBean
     private UserRepository userRepository;
-    @Autowired
+
+    @MockBean
     private RoleRepository roleRepository;
+
+    @MockBean
+    private VacationBalanceService vacationBalanceService;
 
     @Test
     @Transactional
     @WithMockUser(username = "manager@gmail.com", password = "1", roles = "USER")
     void should_create_vacation_balance_when_valid_dto() throws Exception {
         // given
-        RoleEntity roleEntity = roleRepository.findByRoleName("ROLE_USER").orElseThrow();
+        RoleEntity roleEntity = roleRepository.findByRoleName("ROLE_USER")
+                .orElseGet(() -> roleRepository.save(new RoleEntity("ROLE_USER")));
+
         UserEntity userEntity = new UserEntity("manager@gmail.com", "1", "LastName", "FirstName", "manager@gmail.com",
                 roleEntity, true);
+
         userRepository.save(userEntity);
+
         VacationBalanceDto vacationBalanceDto = new VacationBalanceDto(userEntity.getUserId(), 20, 5);
 
         // when
@@ -55,6 +67,6 @@ public class VacationBalanceControllerTests {
                 .andExpect(content().string("The data regarding the remaining days has been successfully added"));
 
         // then
-        //verify(vacationBalanceService).addRecord(vacationBalanceDto);
+        verify(vacationBalanceService).addRecord(vacationBalanceDto);
     }
 }
