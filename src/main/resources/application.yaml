@@ -52,8 +52,8 @@ logging:
       iodkovskaya:
         leaveRequestSystem:
           service: INFO
-#  file:
-#    name: logs/vacation_balance.log
+  file:
+    name: logs/vacation_balance.log
 #    root: DEBUG
 #spring.jpa.defer-datasource-initialization=true
 
