@@ -2,6 +2,7 @@ package pl.iodkovskaya.leaveRequestSystem.entity;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
+import pl.iodkovskaya.leaveRequestSystem.exception.InvalidOperationException;
 import pl.iodkovskaya.leaveRequestSystem.exception.StatusException;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.enums.RequestStatus;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.request.RequestEntity;
@@ -167,5 +168,22 @@ public class RequestEntityTests {
 
         // then
         assertThrows(IllegalArgumentException.class, e);
+    }
+
+    @Test
+    void should_throw_exception_when_approver_has_duplicate_roles() {
+        // given
+        RequestEntity request = new RequestEntity();
+        UserEntity approver1 = new UserEntity("", "", "", "", "", new RoleEntity("ROLE_HR", Set.of()), true);
+        UserEntity approver2 = new UserEntity("", "", "", "", "", new RoleEntity("ROLE_HR", Set.of()), true);
+        request.approve(approver1);
+
+        // when
+        Executable e = () -> request.approve(approver2);
+
+        // then
+        assertThat(request.getStatus()).isEqualTo(RequestStatus.PENDING);
+        assertThat(request.getApprovers().size()).isEqualTo(1);
+        assertThrows(InvalidOperationException.class, e);
     }
 }

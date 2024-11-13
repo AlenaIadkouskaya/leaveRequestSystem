@@ -3,11 +3,9 @@ package pl.iodkovskaya.leaveRequestSystem.model.entity.user;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import pl.iodkovskaya.leaveRequestSystem.exception.InvalidOperationException;
 import pl.iodkovskaya.leaveRequestSystem.exception.RoleExistException;
-import pl.iodkovskaya.leaveRequestSystem.model.entity.role.RoleEntity;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.request.RequestEntity;
+import pl.iodkovskaya.leaveRequestSystem.model.entity.role.RoleEntity;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.vacationbalance.VacationBalanceEntity;
 
 import java.util.HashSet;
@@ -88,7 +86,9 @@ public class UserEntity {
 
     @Override
     public String toString() {
-        return lastName + " " + firstName;
+
+        return (lastName.trim() + " " + firstName.trim()).trim();
+
     }
 
     public void addRole(RoleEntity role) {
