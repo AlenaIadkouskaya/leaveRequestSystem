@@ -24,7 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
-@WithMockUser(username = "manager@gmail.com", password = "1", roles = "USER")
+@WithMockUser(username = "manager@gmail.com", password = "1", roles = "MANAGER")
 public class VacationBalanceControllerTests {
     @Autowired
     private MockMvc mockMvc;
@@ -45,7 +45,6 @@ public class VacationBalanceControllerTests {
     void setUp() {
         userRepository.deleteAll();
         roleRepository.deleteAll();
-
     }
 
     @Test
@@ -63,9 +62,24 @@ public class VacationBalanceControllerTests {
                         .content(objectMapper.writeValueAsString(vacationBalanceDto)))
                 .andExpect(status().isCreated())
                 .andExpect(content().string("The data regarding the remaining days has been successfully added"));
-
     }
 
+    @WithMockUser(username = "manager@gmail.com", password = "1", roles = "USER")
+    @Test
+    void lasjdf() throws Exception {
+        // given
+        RoleEntity roleUser = new RoleEntity("ROLE_USER");
+        UserEntity userEntity = new UserEntity("user@gmail.com", "1", "LastName", "FirstName", "user@gmail.com",
+                roleUser, true);
+        userRepository.save(userEntity);
+        VacationBalanceDto vacationBalanceDto = new VacationBalanceDto(userEntity.getUserId(), 20, 5);
+
+        // when & then
+        mockMvc.perform(post("/api/vacation-balance/new")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(vacationBalanceDto)))
+                .andExpect(status().isForbidden());
+    }
     @Test
     void shouldReturnBadRequestWhenInvalidDto() throws Exception {
         // given

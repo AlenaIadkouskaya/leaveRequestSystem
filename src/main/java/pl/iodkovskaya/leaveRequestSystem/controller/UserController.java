@@ -4,16 +4,13 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import pl.iodkovskaya.leaveRequestSystem.model.dto.UserDto;
 import pl.iodkovskaya.leaveRequestSystem.service.UserService;
 
 import java.nio.file.AccessDeniedException;
-import java.util.List;
 
 @AllArgsConstructor
 @RestController

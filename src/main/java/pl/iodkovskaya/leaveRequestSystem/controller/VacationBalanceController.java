@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,6 +17,7 @@ import pl.iodkovskaya.leaveRequestSystem.service.VacationBalanceService;
 @RequestMapping("/api/vacation-balance")
 public class VacationBalanceController {
     private final VacationBalanceService vacationBalanceService;
+    @PreAuthorize("hasRole('ROLE_MANAGER')")
     @PostMapping("/new")
     public ResponseEntity<String> createVacationBalance(@Valid @RequestBody VacationBalanceDto vacationBalanceDto) {
         vacationBalanceService.addRecord(vacationBalanceDto);
