@@ -31,16 +31,12 @@ public class SecurityConfig {
 
         http
                 .authorizeHttpRequests((requests) -> requests
-//                        .requestMatchers("/api/manager").hasRole("MANAGER")
-//                        .requestMatchers("/api/hr").hasRole("HR")
 //                        .requestMatchers("/api/accountant").hasRole("ACCOUNTANT")
-                        .requestMatchers("/h2-console/**").permitAll()
-                        .requestMatchers("/", "/login**").permitAll()
-                        //.requestMatchers("/api/users/**").hasRole("USER")
-                        .requestMatchers("/api/users/**").permitAll()
-                        //.requestMatchers("/api/users/**").permitAll()
-                        .requestMatchers("/api/leave-requests/**").permitAll()
-                        .anyRequest().authenticated()
+                                .requestMatchers("/h2-console/**").permitAll()
+                                .requestMatchers("/", "/login**").permitAll()
+                                //.requestMatchers("/api/users/**").permitAll()
+                                .requestMatchers("/api/leave-requests/**").permitAll()
+                                .anyRequest().authenticated()
                 )
                 .formLogin(withDefaults())
                 .httpBasic(withDefaults())

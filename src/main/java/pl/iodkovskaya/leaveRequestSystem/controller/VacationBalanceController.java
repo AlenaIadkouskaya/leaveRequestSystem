@@ -17,7 +17,7 @@ import pl.iodkovskaya.leaveRequestSystem.service.VacationBalanceService;
 @RequestMapping("/api/vacation-balance")
 public class VacationBalanceController {
     private final VacationBalanceService vacationBalanceService;
-    @PreAuthorize("hasRole('ROLE_MANAGER')")
+    @PreAuthorize("hasRole('ROLE_MANAGER') or hasRole('ROLE_ACCOUNTANT')")
     @PostMapping("/new")
     public ResponseEntity<String> createVacationBalance(@Valid @RequestBody VacationBalanceDto vacationBalanceDto) {
         vacationBalanceService.addRecord(vacationBalanceDto);

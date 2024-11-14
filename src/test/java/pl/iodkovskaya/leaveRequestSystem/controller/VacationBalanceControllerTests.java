@@ -66,7 +66,7 @@ public class VacationBalanceControllerTests {
 
     @WithMockUser(username = "manager@gmail.com", password = "1", roles = "USER")
     @Test
-    void lasjdf() throws Exception {
+    void should_throw_exception_when_have_not_rights() throws Exception {
         // given
         RoleEntity roleUser = new RoleEntity("ROLE_USER");
         UserEntity userEntity = new UserEntity("user@gmail.com", "1", "LastName", "FirstName", "user@gmail.com",
@@ -80,6 +80,7 @@ public class VacationBalanceControllerTests {
                         .content(objectMapper.writeValueAsString(vacationBalanceDto)))
                 .andExpect(status().isForbidden());
     }
+
     @Test
     void shouldReturnBadRequestWhenInvalidDto() throws Exception {
         // given
