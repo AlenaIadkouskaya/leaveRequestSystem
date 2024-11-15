@@ -9,8 +9,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import pl.iodkovskaya.leaveRequestSystem.service.CustomUserDetailsService;
@@ -31,11 +29,11 @@ public class SecurityConfig {
 
         http
                 .authorizeHttpRequests((requests) -> requests
-//                        .requestMatchers("/api/accountant").hasRole("ACCOUNTANT")
+//                        .requestMatchers("").hasRole("ACCOUNTANT")
                                 .requestMatchers("/h2-console/**").permitAll()
                                 .requestMatchers("/", "/login**").permitAll()
                                 .requestMatchers("/api/leave-requests/new").permitAll()
-                                //.requestMatchers("/api/leave-requests/**").permitAll()
+                                .requestMatchers("/api/leave-requests/all-for-user").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .formLogin(withDefaults())

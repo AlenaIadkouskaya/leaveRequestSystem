@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -34,6 +35,7 @@ public class RequestController {
     }
 
     @PatchMapping("/approve")
+    @PreAuthorize("hasRole('ROLE_MANAGER') or hasRole('ROLE_HR')")
     public ResponseEntity<String> approveRequest(@AuthenticationPrincipal UserDetails currentUser,
                                                  @RequestParam UUID technicalId) throws AccessDeniedException {
         requestService.approveRequest(currentUser.getUsername(), technicalId);
@@ -41,6 +43,7 @@ public class RequestController {
     }
 
     @PatchMapping("/reject")
+    @PreAuthorize("hasRole('ROLE_MANAGER') or hasRole('ROLE_HR')")
     public ResponseEntity<String> rejectRequest(@AuthenticationPrincipal UserDetails currentUser,
                                                 @RequestParam UUID technicalId) throws AccessDeniedException {
         requestService.rejectRequest(currentUser.getUsername(), technicalId);
@@ -48,11 +51,13 @@ public class RequestController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ROLE_MANAGER')")
     public List<RequestResponseDto> getAllRequests() {
         return requestService.getAllRequests();
     }
 
     @GetMapping("{id}")
+    @PreAuthorize("hasRole('ROLE_MANAGER') or hasRole('ROLE_HR')")
     public ResponseEntity<RequestResponseDto> getRequestById(@PathVariable("id") UUID id) {
         RequestResponseDto responseDto = requestService.getRequestById(id);
 
@@ -66,6 +71,7 @@ public class RequestController {
     }
 
     @GetMapping("/to-approve")
+    @PreAuthorize("hasRole('ROLE_MANAGER') or hasRole('ROLE_HR')")
     public List<RequestResponseDto> getAllRequestsToApprove(@AuthenticationPrincipal UserDetails currentUser) {
         String username = currentUser.getUsername();
         return requestService.getAllRequestsToApprove(username);
