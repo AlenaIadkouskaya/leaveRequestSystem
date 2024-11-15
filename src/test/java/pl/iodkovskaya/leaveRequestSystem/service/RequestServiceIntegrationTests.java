@@ -107,7 +107,6 @@ public class RequestServiceIntegrationTests {
         UUID testRequestId = UUID.randomUUID();
         String testUserEmail = "test_user@example.com";
         RoleEntity roleEntity = new RoleEntity("admin");
-        //roleRepository.save(roleEntity);
         UserEntity user = new UserEntity("login", "1", "first", "last", testUserEmail, roleEntity, true);
         userRepository.save(user);
 

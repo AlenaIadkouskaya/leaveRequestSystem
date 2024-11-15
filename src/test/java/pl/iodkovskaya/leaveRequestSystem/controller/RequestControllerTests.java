@@ -1,34 +1,31 @@
 package pl.iodkovskaya.leaveRequestSystem.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import pl.iodkovskaya.leaveRequestSystem.model.dto.UserDto;
+import pl.iodkovskaya.leaveRequestSystem.model.dto.RequestDto;
+import pl.iodkovskaya.leaveRequestSystem.model.entity.enums.RequestStatus;
+import pl.iodkovskaya.leaveRequestSystem.model.entity.request.RequestEntity;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.role.RoleEntity;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.user.UserEntity;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.vacationbalance.VacationBalanceEntity;
 import pl.iodkovskaya.leaveRequestSystem.reposityry.RequestRepository;
-import pl.iodkovskaya.leaveRequestSystem.reposityry.RoleRepository;
 import pl.iodkovskaya.leaveRequestSystem.reposityry.UserRepository;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
-import pl.iodkovskaya.leaveRequestSystem.model.dto.RequestDto;
 import pl.iodkovskaya.leaveRequestSystem.reposityry.VacationBalanceRepository;
 
 import java.time.LocalDate;
-import java.util.UUID;
+
+import static org.hamcrest.Matchers.is;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -102,5 +99,41 @@ public class RequestControllerTests {
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(validLeaveRequestDto)))
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockUser(username = "manager@gmail.com", password = "1", roles = "MANAGER")
+    public void should_return_all_requests_for_manager_role() throws Exception {
+        // given
+        UserEntity user = new UserEntity("user1@mail.com", "password", "LastName", "FirstName", "user1@mail.com", new RoleEntity("ROLE_USER"), true);
+        userRepository.save(user);
+
+        RequestEntity firstRequest = new RequestEntity(user, RequestStatus.CREATED, LocalDate.now(), LocalDate.now().plusDays(5));
+        requestRepository.save(firstRequest);
+        RequestEntity secondRequest = new RequestEntity(user, RequestStatus.CREATED, LocalDate.now().plusDays(30), LocalDate.now().plusDays(35));
+        requestRepository.save(secondRequest);
+
+        // when & then
+        mockMvc.perform(get("/api/leave-requests"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()", is(2)));
+    }
+
+    @Test
+    public void should_return_unauthorizedget_when_user_not_authenticated() throws Exception {
+
+        // when & then
+        mockMvc.perform(get("/api/leave-requests"))
+                .andExpect(status().isUnauthorized());
+    }
+
+
+    @Test
+    @WithMockUser(roles = "USER")
+    public void should_return_forbidden_when_user_not_have_role_manager() throws Exception {
+
+        // when & then
+        mockMvc.perform(get("/api/leave-requests"))
+                .andExpect(status().isForbidden());
     }
 }
