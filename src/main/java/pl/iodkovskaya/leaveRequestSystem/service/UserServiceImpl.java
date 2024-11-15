@@ -25,11 +25,13 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final RoleService roleService;
     private final PasswordEncoder passwordEncoder;
-    @PersistenceContext
-    private EntityManager entityManager;
 
     @Override
     public void deleteUser(Long userId) {
+        UserEntity user = userRepository.findByUserId(userId);
+        if (user == null) {
+            throw new EntityNotFoundException("User not found with id: " + userId);
+        }
         if (userRepository.existsApprovingRequestByUserId(userId)) {
             throw new InvalidOperationException("Cannot delete user because they are an approver in an existing request.");
         }

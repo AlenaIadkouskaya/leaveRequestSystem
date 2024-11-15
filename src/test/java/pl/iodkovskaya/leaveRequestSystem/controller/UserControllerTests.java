@@ -19,8 +19,7 @@ import pl.iodkovskaya.leaveRequestSystem.reposityry.UserRepository;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -94,7 +93,7 @@ public class UserControllerTests {
 
     @Test
     @WithMockUser(roles = "USER")
-    public void should_return_access_denied_if_user_not_have_manager_role() throws Exception {
+    public void should_return_access_denied_if_user_not_have_manager_role_when_changing_role() throws Exception {
         // given
         String email = "test@example.com";
         String roleName = "ROLE_HR";
@@ -140,5 +139,43 @@ public class UserControllerTests {
         mockMvc.perform(patch("/api/users/add-role/{email}", email)
                         .param("roleName", roleName))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void should_delete_user_successfully() throws Exception {
+        // given
+        RoleEntity roleUser = new RoleEntity("ROLE_USER");
+        UserEntity userEntity = new UserEntity("user@gmail.com", "1", "LastName", "FirstName", "user@gmail.com",
+                roleUser, true);
+        userRepository.save(userEntity);
+        Long userId = userEntity.getUserId();
+
+        // when & then
+        mockMvc.perform(delete("/api/users/delete/" + userId))
+                .andExpect(status().isOk())
+                .andExpect(content().string("User deleted successfully"));
+
+    }
+
+    @Test
+    public void should_return_not_found_if_user_not_found_when_deleting() throws Exception {
+        // given
+        Long userId = 999L;
+
+        // when & then
+        mockMvc.perform(delete("/api/users/delete/" + userId))
+                .andExpect(status().isNotFound())
+                .andExpect(result -> assertThat(result.getResolvedException().getMessage(), containsString("User not found")));
+    }
+
+    @Test
+    @WithMockUser(roles = "USER")
+    public void should_return_access_denied_if_user_not_have_manager_role_when_deleting() throws Exception {
+        // given
+        Long userId = 1L;
+
+        // when & then
+        mockMvc.perform(delete("/api/users/delete/" + userId))
+                .andExpect(status().isForbidden());
     }
 }
