@@ -35,11 +35,6 @@ public class VacationBalanceServiceTests {
     private final Logger logger = Mockito.mock(Logger.class);
     @InjectMocks
     private VacationBalanceServiceImpl vacationBalanceService;
-    //@Mock
-    //private static final Logger logger = LoggerFactory.getLogger(VacationBalanceServiceImpl.class);
-    //private final Logger logger = Mockito.mock(LoggerFactory.getLogger(VacationBalanceServiceImpl.class));
-
-
     @Test
     public void should_create_vacation_balance_entity_with_success() {
         // given

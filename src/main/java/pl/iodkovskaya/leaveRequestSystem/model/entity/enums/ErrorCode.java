@@ -13,7 +13,8 @@ public enum ErrorCode {
     ACCESS_DENIED(403, "Access denied: insufficient permissions"),
     STATUS_CONFLICT(409, "Conflict with the current status"),
     ROLE_ALREADY_EXISTS(409, "Role already exists: the specified role is duplicate"),
-    USER_ALREADY_EXISTS(409, "User already exists: the specified user data conflicts");
+    USER_ALREADY_EXISTS(409, "User already exists: the specified user data conflicts"),
+    USER_NOT_AUTHENTICATED(401, "User not authenticated");
 
     private final int code;
     private final String message;

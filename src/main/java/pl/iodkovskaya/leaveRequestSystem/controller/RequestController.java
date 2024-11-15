@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +25,9 @@ public class RequestController {
     @PostMapping("/new")
     public ResponseEntity<UUID> createLeaveRequest(@AuthenticationPrincipal UserDetails currentUser,
                                                    @Valid @RequestBody RequestDto leaveRequestDto) {
+        if (currentUser == null) {
+            throw new AuthenticationCredentialsNotFoundException("User not authenticated");
+        }
         UUID requestId = requestService.createLeaveRequest(currentUser.getUsername(), leaveRequestDto);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(requestId);
