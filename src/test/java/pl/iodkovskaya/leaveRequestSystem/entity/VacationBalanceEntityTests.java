@@ -4,6 +4,8 @@ import org.junit.jupiter.api.Test;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.user.UserEntity;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.vacationbalance.VacationBalanceEntity;
 
+import java.time.LocalDate;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class VacationBalanceEntityTests {
@@ -11,7 +13,7 @@ public class VacationBalanceEntityTests {
     void should_increment_total_days() {
         // given
         UserEntity user = new UserEntity("john_doe", "hashedpassword", "Doe", "John", "john.doe@example.com", null, true);
-        VacationBalanceEntity vacationBalance = new VacationBalanceEntity(user, 20, 5);
+        VacationBalanceEntity vacationBalance = new VacationBalanceEntity(user, 20, 5, LocalDate.of(2023, 6, 18));
 
         // when
         vacationBalance.incrementTotalDays(5);
@@ -26,7 +28,7 @@ public class VacationBalanceEntityTests {
     void should_increment_total_days_when_no_days_left() {
         // given
         UserEntity user = new UserEntity("john_doe", "hashedpassword", "Doe", "John", "john.doe@example.com", null, true);
-        VacationBalanceEntity vacationBalance = new VacationBalanceEntity(user, 10, 10);
+        VacationBalanceEntity vacationBalance = new VacationBalanceEntity(user, 10, 10, LocalDate.of(2023, 6, 18));
 
         // when
         vacationBalance.incrementTotalDays(5);
@@ -41,7 +43,7 @@ public class VacationBalanceEntityTests {
     void should_increase_used_days() {
         // given
         UserEntity user = new UserEntity("john_doe", "hashedpassword", "John", "Doe", "john.doe@example.com", null, true);
-        VacationBalanceEntity vacationBalance = new VacationBalanceEntity(user, 20, 5);
+        VacationBalanceEntity vacationBalance = new VacationBalanceEntity(user, 20, 5, LocalDate.of(2023, 10, 18));
 
 
         // when
@@ -56,7 +58,7 @@ public class VacationBalanceEntityTests {
     void should_decrease_used_days() {
         // given
         UserEntity user = new UserEntity("john_doe", "hashedpassword", "John", "Doe", "john.doe@example.com", null, true);
-        VacationBalanceEntity vacationBalance = new VacationBalanceEntity(user, 20, 5);
+        VacationBalanceEntity vacationBalance = new VacationBalanceEntity(user, 20, 5, LocalDate.of(2023, 6, 5));
 
         // when
         vacationBalance.decreaseUsedDays(3);
@@ -70,7 +72,7 @@ public class VacationBalanceEntityTests {
     void should_decrease_used_days_to_zero() {
         // given
         UserEntity user = new UserEntity("john_doe", "hashedpassword", "John", "Doe", "john.doe@example.com", null, true);
-        VacationBalanceEntity vacationBalance = new VacationBalanceEntity(user, 20, 5);
+        VacationBalanceEntity vacationBalance = new VacationBalanceEntity(user, 20, 5, LocalDate.of(2023, 6, 18));
 
         // when
         vacationBalance.decreaseUsedDays(5);
@@ -84,7 +86,7 @@ public class VacationBalanceEntityTests {
     void should_decrease_used_days_beyond_zero() {
         // given
         UserEntity user = new UserEntity("john_doe", "hashedpassword", "John", "Doe", "john.doe@example.com", null, true);
-        VacationBalanceEntity vacationBalance = new VacationBalanceEntity(user, 20, 5);
+        VacationBalanceEntity vacationBalance = new VacationBalanceEntity(user, 20, 5, LocalDate.of(2024,1,1));
 
         // when
         vacationBalance.decreaseUsedDays(10);

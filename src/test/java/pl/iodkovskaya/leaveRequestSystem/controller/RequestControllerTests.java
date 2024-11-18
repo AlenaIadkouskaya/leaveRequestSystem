@@ -20,12 +20,11 @@ import pl.iodkovskaya.leaveRequestSystem.reposityry.UserRepository;
 import pl.iodkovskaya.leaveRequestSystem.reposityry.VacationBalanceRepository;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 import static org.hamcrest.Matchers.is;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -59,7 +58,7 @@ public class RequestControllerTests {
         UserEntity userEntity = new UserEntity("user@gmail.com", "1", "LastName", "FirstName", "user@gmail.com",
                 roleUser, true);
         userRepository.save(userEntity);
-        VacationBalanceEntity vacationBalance = new VacationBalanceEntity(userEntity, 20, 0);
+        VacationBalanceEntity vacationBalance = new VacationBalanceEntity(userEntity, 20, 0, LocalDate.of(2024, 3, 12));
         vacationBalanceRepository.save(vacationBalance);
         RequestDto validLeaveRequestDto = new RequestDto(LocalDate.of(2024, 12, 1), 6);
 
@@ -72,7 +71,7 @@ public class RequestControllerTests {
 
     @Test
     @WithMockUser(username = "user@gmail.com", password = "1", roles = "USER")
-    public void should_return_bad_request_when_invalid_input_data() throws Exception {
+    public void should_return_bad_request_when_invalid_input_data_when_creating_new_request() throws Exception {
         // given
         RequestDto validLeaveRequestDto = new RequestDto();
 
@@ -84,13 +83,13 @@ public class RequestControllerTests {
     }
 
     @Test
-    public void should_return_unauthorized_when_not_authenticated() throws Exception {
+    public void should_return_unauthorized_when_not_authenticated_when_creating_request() throws Exception {
         // given
         RoleEntity roleUser = new RoleEntity("ROLE_USER");
         UserEntity userEntity = new UserEntity("user@gmail.com", "1", "LastName", "FirstName", "user@gmail.com",
                 roleUser, true);
         userRepository.save(userEntity);
-        VacationBalanceEntity vacationBalance = new VacationBalanceEntity(userEntity, 20, 0);
+        VacationBalanceEntity vacationBalance = new VacationBalanceEntity(userEntity, 20, 0, LocalDate.of(2024, 5, 15));
         vacationBalanceRepository.save(vacationBalance);
         RequestDto validLeaveRequestDto = new RequestDto(LocalDate.of(2024, 12, 1), 6);
 
@@ -120,7 +119,7 @@ public class RequestControllerTests {
     }
 
     @Test
-    public void should_return_unauthorizedget_when_user_not_authenticated() throws Exception {
+    public void should_return_unauthorized_when_user_not_authenticated_when_getting_all_requests() throws Exception {
 
         // when & then
         mockMvc.perform(get("/api/leave-requests"))
@@ -129,11 +128,67 @@ public class RequestControllerTests {
 
 
     @Test
-    @WithMockUser(roles = "USER")
-    public void should_return_forbidden_when_user_not_have_role_manager() throws Exception {
+    @WithMockUser(username = "user@gmail.com", password = "1", roles = "USER")
+    public void should_return_forbidden_when_user_not_have_role_manager_when_getting_all_requests() throws Exception {
 
         // when & then
         mockMvc.perform(get("/api/leave-requests"))
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(username = "manager@gmail.com", password = "1", roles = "MANAGER")
+    void should_approve_request_as_manager() throws Exception {
+        // given
+        UserEntity manager = new UserEntity("manager@gmail.com", "1", "LastName", "FirstName", "manager@gmail.com",
+                new RoleEntity("ROLE_MANAGER"), true);
+        userRepository.save(manager);
+        UserEntity user = new UserEntity("user1@mail.com", "password", "LastName", "FirstName", "user1@mail.com", new RoleEntity("ROLE_USER"), true);
+        userRepository.save(user);
+        RequestEntity request = new RequestEntity(user, RequestStatus.CREATED, LocalDate.now(), LocalDate.now().plusDays(5));
+        requestRepository.save(request);
+
+        // when & then
+        mockMvc.perform(patch("/api/leave-requests/approve")
+                        .param("technicalId", request.getTechnicalId().toString()))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Request has been approved"));
+    }
+
+    @Test
+    @WithMockUser(username = "user@gmail.com", password = "1", roles = "USER")
+    void should_return_forbidden_when_user_not_have_role_manager_when_approving_request() throws Exception {
+        // given
+        UUID technicalId = UUID.randomUUID();
+
+        // when & then
+        mockMvc.perform(patch("/api/leave-requests/approve")
+                        .param("technicalId", technicalId.toString()))
+                .andExpect(status().isForbidden());
+
+    }
+
+    @Test
+    @WithMockUser(username = "manager@gmail.com", password = "1", roles = "MANAGER")
+    void should_return_not_found_when_request_not_found_when_approving_request() throws Exception {
+        // given
+        UUID technicalId = UUID.randomUUID();
+
+        // when & then
+        mockMvc.perform(patch("/api/leave-requests/approve")
+                        .param("technicalId", technicalId.toString()))
+                .andExpect(status().isNotFound());
+
+    }
+
+    @Test
+    void should_return_unauthorized_when_approving_request_when_user_not_authorized() throws Exception {
+        // given
+        UUID technicalId = UUID.randomUUID();
+
+        // when & then
+        mockMvc.perform(patch("/api/leave-requests/approve")
+                        .param("technicalId", technicalId.toString()))
+                .andExpect(status().isUnauthorized());
     }
 }

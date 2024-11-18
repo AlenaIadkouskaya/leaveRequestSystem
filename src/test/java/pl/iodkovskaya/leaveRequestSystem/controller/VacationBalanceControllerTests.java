@@ -17,6 +17,8 @@ import pl.iodkovskaya.leaveRequestSystem.reposityry.RoleRepository;
 import pl.iodkovskaya.leaveRequestSystem.reposityry.UserRepository;
 import pl.iodkovskaya.leaveRequestSystem.service.VacationBalanceService;
 
+import java.time.LocalDate;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -54,7 +56,7 @@ public class VacationBalanceControllerTests {
         UserEntity userEntity = new UserEntity("user@gmail.com", "1", "LastName", "FirstName", "user@gmail.com",
                 roleUser, true);
         userRepository.save(userEntity);
-        VacationBalanceDto vacationBalanceDto = new VacationBalanceDto(userEntity.getUserId(), 20, 5);
+        VacationBalanceDto vacationBalanceDto = new VacationBalanceDto(userEntity.getUserId(), 20, 5, LocalDate.of(2024, 12, 12));
 
         // when & then
         mockMvc.perform(post("/api/vacation-balance/new")
@@ -72,7 +74,7 @@ public class VacationBalanceControllerTests {
         UserEntity userEntity = new UserEntity("user@gmail.com", "1", "LastName", "FirstName", "user@gmail.com",
                 roleUser, true);
         userRepository.save(userEntity);
-        VacationBalanceDto vacationBalanceDto = new VacationBalanceDto(userEntity.getUserId(), 20, 5);
+        VacationBalanceDto vacationBalanceDto = new VacationBalanceDto(userEntity.getUserId(), 20, 5, LocalDate.of(2023, 5, 1));
 
         // when & then
         mockMvc.perform(post("/api/vacation-balance/new")
@@ -88,7 +90,7 @@ public class VacationBalanceControllerTests {
         UserEntity userEntity = new UserEntity("user@gmail.com", "1", "LastName", "FirstName", "user@gmail.com",
                 roleUser, true);
         userRepository.save(userEntity);
-        VacationBalanceDto invalidDto = new VacationBalanceDto(null, 20, 5);
+        VacationBalanceDto invalidDto = new VacationBalanceDto(null, 20, 5, LocalDate.of(2015, 1, 1));
 
         // when & then
         mockMvc.perform(post("/api/vacation-balance/new")

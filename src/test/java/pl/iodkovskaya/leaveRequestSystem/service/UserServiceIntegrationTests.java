@@ -63,7 +63,7 @@ public class UserServiceIntegrationTests {
         // given
         UserEntity user = new UserEntity("mailTest@gmail.com", "", "", "", "mailTest@gmail.com",
                 new RoleEntity("ROLE_USER"), true);
-        VacationBalanceEntity vacationBalance = new VacationBalanceEntity(user, 20, 0);
+        VacationBalanceEntity vacationBalance = new VacationBalanceEntity(user, 20, 0, LocalDate.of(2023, 9, 9));
         userRepository.save(user);
 
         // when

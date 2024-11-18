@@ -4,6 +4,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,16 +15,27 @@ import pl.iodkovskaya.leaveRequestSystem.model.entity.user.UserEntity;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.vacationbalance.VacationBalanceEntity;
 import pl.iodkovskaya.leaveRequestSystem.reposityry.VacationBalanceRepository;
 
+import java.time.LocalDate;
+import java.time.Year;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Service
-@AllArgsConstructor
+//@AllArgsConstructor
 public class VacationBalanceServiceImpl implements VacationBalanceService, RequestListener {
     private final UserService userService;
     private final VacationBalanceRepository vacationBalanceRepository;
     private static final int MONTHLY_VACATION_DAYS_INCREMENT = 2;
     private static final Logger logger = LoggerFactory.getLogger(VacationBalanceServiceImpl.class);
+    @Value("${vacation.increment.cron}")
+    private String vacationIncrementCron;
+
+    public VacationBalanceServiceImpl(UserService userService, VacationBalanceRepository vacationBalanceRepository,
+                                      @Value("${vacation.increment.cron}") String vacationIncrementCron) {
+        this.userService = userService;
+        this.vacationBalanceRepository = vacationBalanceRepository;
+        this.vacationIncrementCron = vacationIncrementCron;
+    }
 
     @Override
     public void addRecord(VacationBalanceDto vacationBalanceDto) {
@@ -33,7 +45,8 @@ public class VacationBalanceServiceImpl implements VacationBalanceService, Reque
         }
         VacationBalanceEntity vacationBalanceEntity = new VacationBalanceEntity(userById,
                 vacationBalanceDto.getTotalDays(),
-                vacationBalanceDto.getUsedDays());
+                vacationBalanceDto.getUsedDays(),
+                vacationBalanceDto.getHireDate());
 
         vacationBalanceRepository.save(vacationBalanceEntity);
     }
@@ -63,12 +76,18 @@ public class VacationBalanceServiceImpl implements VacationBalanceService, Reque
         vacationBalance.decreaseUsedDays(days);
     }
 
-    @Scheduled(cron = "0 0 0 1 * ?") // co miesiąc
-    //@Scheduled(cron = "0 * * * * ?") // co 1 minuta
+    @Scheduled(cron = "#{@vacationIncrementCron}")
     @Transactional
     @Override
     public void incrementVacationDaysMonthly() {
-        List<VacationBalanceEntity> balances = vacationBalanceRepository.findAll();
+        //List<VacationBalanceEntity> balances = vacationBalanceRepository.findAll();
+        LocalDate today = LocalDate.now();
+        int month = today.getMonthValue();
+        int day = today.getDayOfMonth();
+        boolean isLeapYear = Year.isLeap(today.getYear());
+
+        List<VacationBalanceEntity> balances = vacationBalanceRepository.findAllByHireDateMonthAndDay(day, isLeapYear);
+
 
         for (VacationBalanceEntity balance : balances) {
             try {

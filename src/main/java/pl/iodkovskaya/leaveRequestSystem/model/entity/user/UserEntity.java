@@ -50,19 +50,6 @@ public class UserEntity {
     @Version
     private Long version;
 
-    @PreRemove
-    public void checkIfUserCanBeRemoved() {
-
-//        if (requests == null || requests.isEmpty()) {
-//            requests = new HashSet<>();
-//        }
-//        boolean isApprover = requests.stream()
-//                .anyMatch(request -> request.getApprovers().contains(this));
-//        if (isApprover) {
-//            throw new InvalidOperationException("Cannot delete user because they are an approver in an existing request.");
-//        }
-    }
-
     public UserEntity(String username, String passwordHash, String lastName, String firstName, String email, RoleEntity role, boolean enabled) {
         this.username = username;
         this.passwordHash = passwordHash;

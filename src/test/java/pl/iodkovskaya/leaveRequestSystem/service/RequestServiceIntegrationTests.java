@@ -64,17 +64,17 @@ public class RequestServiceIntegrationTests {
         RequestEntity request = new RequestEntity(user, RequestStatus.PENDING, LocalDate.now(), LocalDate.now().plusDays(daysRequested));
         requestRepository.save(request);
 
-        VacationBalanceEntity vacationBalance = new VacationBalanceEntity(user, 15, 6);
+        VacationBalanceEntity vacationBalance = new VacationBalanceEntity(user, 15, 6, LocalDate.of(2023, 12, 31));
         vacationBalanceRepository.save(vacationBalance);
 
         // when
         requestService.rejectRequest(userEmail, request.getTechnicalId());
+
+        // then
         RequestEntity updatedRequest = requestRepository.findByTechnicalId(request.getTechnicalId())
                 .orElseThrow(() -> new EntityNotFoundException("Request not found"));
         VacationBalanceEntity vacationBalanceForUserAfterReject = vacationBalanceRepository.findByUser(user)
                 .orElseThrow(() -> new EntityNotFoundException("Data not found"));
-
-        // then
         assertThat(requestRepository.findByTechnicalId(request.getTechnicalId())).isNotNull();
         assertThat(updatedRequest.getStatus()).isEqualTo(RequestStatus.REJECTED);
         assertThat(vacationBalanceForUserAfterReject.getUsedDays()).isEqualTo(0);

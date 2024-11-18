@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.user.UserEntity;
 
+import java.time.LocalDate;
+
 @Entity
 @Table(name = "vacation_balances", uniqueConstraints = {
         @UniqueConstraint(columnNames = "user_id")
@@ -29,26 +31,30 @@ public class VacationBalanceEntity {
 
     @Column(name = "remaining_days", nullable = false)
     private Integer remainingDays;
+    @Column(name = "hire_date", nullable = false)
+    private LocalDate hireDate;
 
     @Version
     private Long version;
 
-    public VacationBalanceEntity(UserEntity user, Integer totalDays, Integer usedDays) {
+    public VacationBalanceEntity(UserEntity user, Integer totalDays, Integer usedDays, LocalDate hireDate) {
         this.user = user;
         this.totalDays = totalDays;
         this.usedDays = usedDays;
         this.remainingDays = totalDays - usedDays;
+        this.hireDate = hireDate;
     }
 
     protected VacationBalanceEntity() {
     }
 
-    public VacationBalanceEntity(Long id, UserEntity user, Integer totalDays, Integer usedDays, Integer remainingDays) {
+    public VacationBalanceEntity(Long id, UserEntity user, Integer totalDays, Integer usedDays, Integer remainingDays, LocalDate hireDate) {
         this.id = id;
         this.user = user;
         this.totalDays = totalDays;
         this.usedDays = usedDays;
         this.remainingDays = remainingDays;
+        this.hireDate = hireDate;
     }
 
     private void updateRemainderDays() {

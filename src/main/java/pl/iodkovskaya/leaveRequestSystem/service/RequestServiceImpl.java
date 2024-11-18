@@ -30,10 +30,9 @@ public class RequestServiceImpl implements RequestService {
     @Override
     @Transactional
     public UUID createLeaveRequest(String userEmail, RequestDto leaveRequestDto) {
-        UserEntity userByEmail = findUserByEmailOrThrow(userEmail);
+        UserEntity userByEmail = findUserByEmail(userEmail);
         LocalDate startVacation = leaveRequestDto.getStartDate();
         LocalDate endVacation = leaveRequestDto.getStartDate().plusDays(leaveRequestDto.getDurationVacation() - 1);
-
 
         RequestEntity newRequest = new RequestEntity(
                 userByEmail,
@@ -59,7 +58,7 @@ public class RequestServiceImpl implements RequestService {
     @Override
     @Transactional
     public void approveRequest(String userEmail, UUID technicalId) {
-        UserEntity approver = findUserByEmailOrThrow(userEmail);
+        UserEntity approver = findUserByEmail(userEmail);
         logService.logApprovalAttempt(technicalId, approver.getUserId(), "APPROVE");
 
         RequestEntity request = requestRepository.findByTechnicalId(technicalId)
@@ -71,7 +70,7 @@ public class RequestServiceImpl implements RequestService {
     @Override
     @Transactional
     public void rejectRequest(String userEmail, UUID technicalId) {
-        UserEntity performer = findUserByEmailOrThrow(userEmail);
+        UserEntity performer = findUserByEmail(userEmail);
         logService.logApprovalAttempt(technicalId, performer.getUserId(), "REJECT");
 
         RequestEntity request = requestRepository.findByTechnicalId(technicalId)
@@ -96,7 +95,7 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public List<RequestResponseDto> getRequestsByUser(String username) {
-        UserEntity user = findUserByEmailOrThrow(username);
+        UserEntity user = findUserByEmail(username);
         List<RequestEntity> requests = requestRepository.findByUser(user);
         return requests.stream()
                 .map(requestMapper::fromEntity)
@@ -105,7 +104,7 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public List<RequestResponseDto> getAllRequestsToApprove(String username) {
-        UserEntity approver = findUserByEmailOrThrow(username);
+        UserEntity approver = findUserByEmail(username);
         List<RequestEntity> filteredRequests = findAllRequestsToApproveForCurrentApprover(approver);
 
         return filteredRequests.stream()
@@ -123,7 +122,8 @@ public class RequestServiceImpl implements RequestService {
                 .toList();
     }
 
-    private UserEntity findUserByEmailOrThrow(String email) {
+
+    private UserEntity findUserByEmail(String email) {
         UserEntity user = userService.findUserByEmail(email);
         if (user == null) {
             throw new EntityNotFoundException("User not found with email: " + email);

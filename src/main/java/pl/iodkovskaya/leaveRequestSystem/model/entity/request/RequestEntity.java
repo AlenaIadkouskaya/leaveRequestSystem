@@ -45,7 +45,7 @@ public class RequestEntity {
     @Version
     private Long version;
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
     @JoinTable(
             name = "request_approvers",
             joinColumns = @JoinColumn(name = "request_id"),

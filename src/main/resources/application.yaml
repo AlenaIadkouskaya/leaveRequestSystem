@@ -16,7 +16,7 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         show-sql: true
-#    defer-datasource-initialization: true
+  #    defer-datasource-initialization: true
 
   profiles:
     include: local
@@ -54,6 +54,9 @@ logging:
           service: INFO
   file:
     name: logs/vacation_balance.log
+vacation:
+  increment:
+    cron: "0 0 0 * * ?"
 #    root: DEBUG
 #spring.jpa.defer-datasource-initialization=true
 

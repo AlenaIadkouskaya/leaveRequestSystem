@@ -17,6 +17,7 @@ import pl.iodkovskaya.leaveRequestSystem.model.entity.vacationbalance.VacationBa
 import pl.iodkovskaya.leaveRequestSystem.reposityry.VacationBalanceRepository;
 
 import java.time.LocalDate;
+import java.time.Year;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -35,10 +36,11 @@ public class VacationBalanceServiceTests {
     private final Logger logger = Mockito.mock(Logger.class);
     @InjectMocks
     private VacationBalanceServiceImpl vacationBalanceService;
+
     @Test
     public void should_create_vacation_balance_entity_with_success() {
         // given
-        VacationBalanceDto vacationBalanceDto = new VacationBalanceDto(1L, 20, 5);
+        VacationBalanceDto vacationBalanceDto = new VacationBalanceDto(1L, 20, 5, LocalDate.of(2023, 6, 18));
         UserEntity userEntity = new UserEntity("login", "1", "a@gmail.com");
         when(userService.findUserById(vacationBalanceDto.getUserId())).thenReturn(userEntity);
         // when
@@ -55,7 +57,7 @@ public class VacationBalanceServiceTests {
     @Test
     public void should_throw_exception_when_user_not_found() {
         // given
-        VacationBalanceDto vacationBalanceDto = new VacationBalanceDto(1L, 20, 5);
+        VacationBalanceDto vacationBalanceDto = new VacationBalanceDto(1L, 20, 5, LocalDate.of(2020, 8, 9));
         when(userService.findUserById(vacationBalanceDto.getUserId())).thenReturn(null);
         // when
         Executable e = () -> vacationBalanceService.addRecord(vacationBalanceDto);
@@ -67,7 +69,7 @@ public class VacationBalanceServiceTests {
     public void should_pass_check_when_remainder_for_user_has_sufficient_days() {
         // given
         UserEntity userEntity = new UserEntity("login", "1", "a@gmail.com");
-        VacationBalanceEntity vacationBalance = new VacationBalanceEntity(1L, userEntity, 10, 0, 10);
+        VacationBalanceEntity vacationBalance = new VacationBalanceEntity(1L, userEntity, 10, 0, 10, LocalDate.of(2024, 11, 18));
         when(vacationBalanceRepository.findByUser(userEntity)).thenReturn(Optional.of(vacationBalance));
 
         // when
@@ -81,7 +83,7 @@ public class VacationBalanceServiceTests {
     public void should_throw_exception_when_remainder_for_user_less() {
         // given
         UserEntity userEntity = new UserEntity("login", "1", "a@gmail.com");
-        VacationBalanceEntity vacationBalance = new VacationBalanceEntity(1L, userEntity, 3, 0, 3);
+        VacationBalanceEntity vacationBalance = new VacationBalanceEntity(1L, userEntity, 3, 0, 3, LocalDate.of(2023, 6, 18));
         when(vacationBalanceRepository.findByUser(userEntity)).thenReturn(Optional.of(vacationBalance));
 
         // when
@@ -110,7 +112,7 @@ public class VacationBalanceServiceTests {
     public void should_update_used_days_with_existing_balance() {
         // given
         UserEntity userEntity = new UserEntity("login", "1", "a@gmail.com");
-        VacationBalanceEntity vacationBalance = new VacationBalanceEntity(1L, userEntity, 10, 0, 10);
+        VacationBalanceEntity vacationBalance = new VacationBalanceEntity(1L, userEntity, 10, 0, 10, LocalDate.of(2023, 6, 18));
         RequestEntity request = new RequestEntity(userEntity, RequestStatus.CREATED, LocalDate.now(), LocalDate.now().plusDays(5));
         when(vacationBalanceRepository.findByUser(userEntity)).thenReturn(Optional.of(vacationBalance));
         int durationVacation = 6;
@@ -150,7 +152,12 @@ public class VacationBalanceServiceTests {
         when(balance2.getUser()).thenReturn(new UserEntity(2L, "user_2@gmail.com"));
 
         List<VacationBalanceEntity> balances = Arrays.asList(balance1, balance2);
-        when(vacationBalanceRepository.findAll()).thenReturn(balances);
+
+        LocalDate today = LocalDate.now();
+        int month = today.getMonthValue();
+        int day = today.getDayOfMonth();
+        boolean isLeapYear = Year.isLeap(today.getYear());
+        when(vacationBalanceRepository.findAllByHireDateMonthAndDay(day, isLeapYear)).thenReturn(balances);
 
         // when
         vacationBalanceService.incrementVacationDaysMonthly();
@@ -176,9 +183,13 @@ public class VacationBalanceServiceTests {
 
         VacationBalanceEntity balance2 = mock(VacationBalanceEntity.class);
         when(balance2.getUser()).thenReturn(new UserEntity(2L, "user_2@gmail.com"));
+        LocalDate today = LocalDate.now();
+        int month = today.getMonthValue();
+        int day = today.getDayOfMonth();
+        boolean isLeapYear = Year.isLeap(today.getYear());
 
         List<VacationBalanceEntity> balances = Arrays.asList(balance1, balance2);
-        when(vacationBalanceRepository.findAll()).thenReturn(balances);
+        when(vacationBalanceRepository.findAllByHireDateMonthAndDay(day, isLeapYear)).thenReturn(balances);
         doThrow(new RuntimeException("Error incrementing days")).when(balance2).incrementTotalDays(any(Integer.class));
 
         // when
