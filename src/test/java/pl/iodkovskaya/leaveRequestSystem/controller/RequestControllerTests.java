@@ -6,10 +6,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import pl.iodkovskaya.leaveRequestSystem.mapper.RequestMapper;
 import pl.iodkovskaya.leaveRequestSystem.model.dto.RequestDto;
+import pl.iodkovskaya.leaveRequestSystem.model.dto.RequestResponseDto;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.enums.RequestStatus;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.request.RequestEntity;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.role.RoleEntity;
@@ -20,8 +23,11 @@ import pl.iodkovskaya.leaveRequestSystem.reposityry.UserRepository;
 import pl.iodkovskaya.leaveRequestSystem.reposityry.VacationBalanceRepository;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -36,6 +42,8 @@ public class RequestControllerTests {
 
     @Autowired
     private ObjectMapper objectMapper;
+    @Autowired
+    private RequestMapper requestMapper;
     @Autowired
     private RequestRepository requestRepository;
     @Autowired
@@ -190,5 +198,144 @@ public class RequestControllerTests {
         mockMvc.perform(patch("/api/leave-requests/approve")
                         .param("technicalId", technicalId.toString()))
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockUser(username = "hr@gmail.com", password = "1", roles = "HR")
+    void should_reject_request_with_hr_role() throws Exception {
+        // given
+        UserEntity hr = new UserEntity("hr@gmail.com", "1", "LastName", "FirstName", "hr@gmail.com",
+                new RoleEntity("ROLE_HR"), true);
+        userRepository.save(hr);
+        UserEntity user = new UserEntity("user1@mail.com", "password", "LastName", "FirstName", "user1@mail.com", new RoleEntity("ROLE_USER"), true);
+        userRepository.save(user);
+        VacationBalanceEntity vacationBalance = new VacationBalanceEntity(user, 20, 0, LocalDate.of(2024, 5, 15));
+        vacationBalanceRepository.save(vacationBalance);
+        RequestEntity request = new RequestEntity(user, RequestStatus.CREATED, LocalDate.now(), LocalDate.now().plusDays(5));
+        requestRepository.save(request);
+
+        // when & then
+        mockMvc.perform(patch("/api/leave-requests/reject")
+                        .param("technicalId", request.getTechnicalId().toString()))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Request has been rejected"));
+
+    }
+
+    @Test
+    @WithMockUser(username = "manager@gmail.com", password = "1", roles = "MANAGER")
+    void should_return_bad_request_when_request_with_id_not_exist_when_rejecting() throws Exception {
+        mockMvc.perform(patch("/api/leave-requests/reject"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @WithMockUser(username = "manager@gmail.com", password = "1", roles = "MANAGER")
+    void should_get_request_by_id_with_manager_role() throws Exception {
+        // given
+        UserEntity manager = new UserEntity("manager@gmail.com", "1", "LastName", "FirstName", "manager@gmail.com",
+                new RoleEntity("ROLE_MANAGER"), true);
+        userRepository.save(manager);
+        UserEntity user = new UserEntity("user1@mail.com", "password", "LastName", "FirstName", "user1@mail.com", new RoleEntity("ROLE_USER"), true);
+        userRepository.save(user);
+        RequestEntity request = new RequestEntity(user, RequestStatus.CREATED, LocalDate.now(), LocalDate.now().plusDays(5));
+        requestRepository.save(request);
+
+        // when & then
+        mockMvc.perform(get("/api/leave-requests/" + request.getTechnicalId().toString()))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(username = "hr@gmail.com", password = "1", roles = "HR")
+    void should_return_bad_request_when_id_has_invalid_UUID_format_when_getting_request_by_id() throws Exception {
+        // given
+        String invalidUUID = "invalid-uuid";
+
+        // when & then
+        mockMvc.perform(get("/api/leave-requests/" + invalidUUID))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @WithMockUser(username = "test@gmail.com", password = "1", roles = "USER")
+    void should_return_all_requests_for_logged_user() throws Exception {
+        // given
+        UserEntity user = new UserEntity("test@gmail.com", "password", "LastName", "FirstName", "test@gmail.com",
+                new RoleEntity("ROLE_USER"), true);
+        userRepository.save(user);
+        RequestEntity request = new RequestEntity(user, RequestStatus.APPROVED, LocalDate.now(), LocalDate.now().plusDays(5));
+        requestRepository.save(request);
+        RequestEntity request2 = new RequestEntity(user, RequestStatus.PENDING, LocalDate.now(), LocalDate.now().plusDays(5));
+        requestRepository.save(request2);
+        List<RequestResponseDto> listRequests = List.of(requestMapper.fromEntity(request), requestMapper.fromEntity(request2));
+
+        // when & then
+        mockMvc.perform(get("/api/leave-requests/all-for-user")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(listRequests.size()))
+                .andExpect(jsonPath("$[0].status").value("APPROVED"))
+                .andExpect(jsonPath("$[1].status").value("PENDING"));
+    }
+
+    @Test
+    @WithMockUser(username = "nonExistentUser")
+    void shoul_return_bad_request_when_logged_user_not_when_trying_to_get_all_requests() throws Exception {
+        // when & then
+        mockMvc.perform(get("/api/leave-requests/all-for-user")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(result -> assertThat(result.getResolvedException().getMessage(), containsString("User not found")));
+    }
+
+    @Test
+    @WithMockUser(username = "hr@gmail.com", password = "1", roles = "HR")
+    void should_get_all_requests_to_approve_with_role_hr() throws Exception {
+        // given
+        UserEntity hr = new UserEntity("hr@gmail.com", "1", "LastName", "FirstName", "hr@gmail.com",
+                new RoleEntity("ROLE_HR"), true);
+        userRepository.save(hr);
+        UserEntity user = new UserEntity("test@gmail.com", "password", "LastName", "FirstName", "test@gmail.com",
+                new RoleEntity("ROLE_USER"), true);
+        userRepository.save(user);
+        RequestEntity request = new RequestEntity(user, RequestStatus.PENDING, LocalDate.now(), LocalDate.now().plusDays(5));
+        requestRepository.save(request);
+        RequestEntity request2 = new RequestEntity(user, RequestStatus.APPROVED, LocalDate.now(), LocalDate.now().plusDays(5));
+        requestRepository.save(request2);
+
+        List<RequestResponseDto> listRequests = List.of(requestMapper.fromEntity(request));
+
+        // when & then
+        mockMvc.perform(get("/api/leave-requests/to-approve")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(listRequests.size()))
+                .andExpect(jsonPath("$[0].status").value("PENDING"));
+    }
+
+    @Test
+    @WithMockUser(username = "hr@gmail.com", password = "1", roles = "HR")
+    void should_return_empty_list_when_requests_to_approve_not_found() throws Exception {
+        // given
+        UserEntity hr = new UserEntity("hr@gmail.com", "1", "LastName", "FirstName", "hr@gmail.com",
+                new RoleEntity("ROLE_HR"), true);
+        userRepository.save(hr);
+        UserEntity user = new UserEntity("test@gmail.com", "password", "LastName", "FirstName", "test@gmail.com",
+                new RoleEntity("ROLE_USER"), true);
+        userRepository.save(user);
+        RequestEntity request = new RequestEntity(user, RequestStatus.REJECTED, LocalDate.now(), LocalDate.now().plusDays(5));
+        requestRepository.save(request);
+        RequestEntity request2 = new RequestEntity(user, RequestStatus.APPROVED, LocalDate.now(), LocalDate.now().plusDays(5));
+        requestRepository.save(request2);
+
+        // when & then
+        mockMvc.perform(get("/api/leave-requests/to-approve")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(0));
     }
 }
