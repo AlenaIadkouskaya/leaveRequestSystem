@@ -1,5 +1,5 @@
 server:
-  port: 8787
+  port: 8089
 spring:
   application:
     name: leaveRequestSystem
@@ -7,6 +7,7 @@ spring:
     username: <YOUR_USERNAME>
     password: <YOUR_PASSWORD>>
     url: jdbc:postgresql://localhost:8081/vacations
+#    url: jdbc:postgresql://db:5432/mydatabase
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -52,8 +53,8 @@ logging:
       iodkovskaya:
         leaveRequestSystem:
           service: INFO
-  file:
-    name: logs/vacation_balance.log
+#  file:
+#    name: logs/vacation_balance.log
 vacation:
   increment:
     cron: "0 0 0 * * ?"
