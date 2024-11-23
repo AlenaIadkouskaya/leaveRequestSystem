@@ -1,8 +1,6 @@
 package pl.iodkovskaya.leaveRequestSystem.service;
 
-import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.persistence.PersistenceContext;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -57,7 +55,7 @@ public class UserServiceImpl implements UserService {
             throw new UserAlreadyExistsException("User with email: " + user.getEmail() + " exists!");
         }
         try {
-            userRepository.save(new UserEntity(user.getLogin(),
+            userRepository.save(new UserEntity(user.getUsername(),
                     passwordEncoder.encode(user.getPassword()),
                     user.getLastName(),
                     user.getFirstName(),

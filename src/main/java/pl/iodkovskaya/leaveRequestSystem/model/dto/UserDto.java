@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserDto {
-    private String login;
+    private String username;
     private String password;
     private String email;
     private String firstName;

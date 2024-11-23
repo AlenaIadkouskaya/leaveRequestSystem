@@ -34,6 +34,7 @@ public class SecurityConfig {
                                 .requestMatchers("/", "/login**").permitAll()
                                 .requestMatchers("/api/leave-requests/new").permitAll()
                                 .requestMatchers("/api/leave-requests/all-for-user").permitAll()
+                                .requestMatchers("/api/users/register").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .formLogin(withDefaults())
