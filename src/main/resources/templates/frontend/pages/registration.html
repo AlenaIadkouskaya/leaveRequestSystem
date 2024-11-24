@@ -9,6 +9,7 @@
 
 <h2>Register User</h2>
 <form id="registerForm">
+    <input type="hidden" name="_csrf" value="${_csrf.token}"/>
     <input type="text" id="email" placeholder="Email" required/>
     <input type="text" id="username" placeholder="Username" required/>
     <input type="text" id="firstName" placeholder="First Name" required/>

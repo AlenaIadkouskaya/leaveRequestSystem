@@ -5,7 +5,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -29,16 +28,11 @@ public class CustomOAuth2AuthenticationSuccessHandler implements AuthenticationS
         String login = oAuth2User.getAttribute("login");
 
         try {
-//            UserDetails userDetails = userService.loadUserByUsername(username);
             UserDetails userDetails = customUserDetailsService.loadUserByUsername(login);
-        } catch (UsernameNotFoundException | NullPointerException e){
+        } catch (UsernameNotFoundException | NullPointerException e) {
             userService.registerOAuth2User(login);
         }
 
-
         response.sendRedirect("/");
-
     }
-
-
 }

@@ -23,23 +23,40 @@ public class SecurityConfig {
     private final CustomOAuth2AuthenticationSuccessHandler successHandler;
     private final CustomUserDetailsService customUserDetailsService;
     private final PasswordEncoder passwordEncoder;
+//    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+//        http
+//                .authorizeRequests()
+//                .requestMatchers("/", "/login**", "/oauth2/**").permitAll() // Разрешаем доступ к этим страницам без авторизации
+//                .anyRequest().authenticated() // Все остальные запросы требуют авторизации
+//                .and()
+//                .formLogin()
+//                .loginPage("/login")
+//                .permitAll() // Разрешаем доступ к странице логина без авторизации
+//                .and()
+//                .httpBasic(); // Для базовой аутентификации (если нужно)
+//
+//        return http.build();
+//    }
+
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http
                 .authorizeHttpRequests((requests) -> requests
-//                        .requestMatchers("").hasRole("ACCOUNTANT")
-                                .requestMatchers("/h2-console/**").permitAll()
-                                .requestMatchers("/", "/login**").permitAll()
-                                .requestMatchers("/api/leave-requests/new").permitAll()
-                                .requestMatchers("/api/leave-requests/all-for-user").permitAll()
-                                .requestMatchers("/api/users/register").permitAll()
-                                .anyRequest().authenticated()
+                        .requestMatchers("/h2-console/**").permitAll()
+                        .requestMatchers("/", "/login**", "/oauth2/**").permitAll()
+                        .requestMatchers("/api/leave-requests/new").permitAll()
+                        .requestMatchers("/api/leave-requests/all-for-user").permitAll()
+                        .requestMatchers("/api/users/register").permitAll()
+                        .anyRequest().authenticated()
+
                 )
-                .formLogin(withDefaults())
+                .formLogin().loginPage("/login").permitAll()
+                .and()
                 .httpBasic(withDefaults())
                 .oauth2Login(oauth2 -> oauth2
+                        .loginPage("/login")
                         .successHandler(successHandler)
                 )
         ;
