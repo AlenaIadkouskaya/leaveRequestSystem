@@ -16,4 +16,5 @@ public interface RequestService {
     RequestResponseDto getRequestById(UUID id);
     List<RequestResponseDto> getRequestsByUser(String userEmail);
     List<RequestResponseDto> getAllRequestsToApprove(String username);
+    void approveRequestAsync(String userEmail, UUID technicalId);
 }

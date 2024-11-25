@@ -17,8 +17,6 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         show-sql: true
-  #    defer-datasource-initialization: true
-
   profiles:
     include: local
   security:
@@ -60,7 +58,16 @@ vacation:
     cron: "0 0 0 * * ?"
 #    root: DEBUG
 #spring.jpa.defer-datasource-initialization=true
-
-
+org:
+  jobrunr:
+    background-job-server:
+      enabled: true
+      poll-interval-in-seconds: 5
+    dashboard:
+      enabled: true
+      port: 8000
+    jobs:
+      default-number-of-retries: 3
+      retry-interval: PT10S
 
 

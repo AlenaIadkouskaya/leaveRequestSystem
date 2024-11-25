@@ -1,0 +1,30 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: Alena Iadkouskaya
+      changes:
+        - createTable:
+            tableName: approveRequestParams
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: jobId
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: userEmail
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: technicalId
+                  type: uuid
+                  constraints:
+                    nullable: false

@@ -2,6 +2,7 @@ package pl.iodkovskaya.leaveRequestSystem.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
+import org.jobrunr.scheduling.JobScheduler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.iodkovskaya.leaveRequestSystem.mapper.RequestMapper;
@@ -26,6 +27,7 @@ public class RequestServiceImpl implements RequestService {
     private final RequestListener requestListener;
     private final RequestMapper requestMapper;
     private final LogService logService;
+    private final JobScheduler jobScheduler;
 
     @Override
     @Transactional
@@ -56,8 +58,15 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
-    @Transactional
     public void approveRequest(String userEmail, UUID technicalId) {
+        jobScheduler
+                .enqueue(() -> approveRequestAsync(userEmail, technicalId));
+    }
+
+    @Transactional
+    @Override
+    public void approveRequestAsync(String userEmail, UUID technicalId) {
+
         UserEntity approver = findUserByEmail(userEmail);
         logService.logApprovalAttempt(technicalId, approver.getUserId(), "APPROVE");
 
@@ -65,6 +74,7 @@ public class RequestServiceImpl implements RequestService {
                 .orElseThrow(() -> new EntityNotFoundException("Request not found with technical ID: " + technicalId));
 
         request.approve(approver);
+
     }
 
     @Override
