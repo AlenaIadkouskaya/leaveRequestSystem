@@ -29,12 +29,12 @@ public class SecurityConfig {
 
         http
                 .authorizeHttpRequests((requests) -> requests
-//                        .requestMatchers("").hasRole("ACCOUNTANT")
-                                .requestMatchers("/h2-console/**").permitAll()
-                                .requestMatchers("/", "/login**").permitAll()
-                                .requestMatchers("/api/leave-requests/new").permitAll()
-                                .requestMatchers("/api/leave-requests/all-for-user").permitAll()
-                                .anyRequest().authenticated()
+                        .requestMatchers("/h2-console/**").permitAll()
+                        .requestMatchers("/", "/login**").permitAll()
+                        .requestMatchers("/api/leave-requests/new").permitAll()
+                        .requestMatchers("/api/leave-requests/all-for-user").permitAll()
+                        .requestMatchers("/api/users/register").permitAll()
+                        .anyRequest().authenticated()
                 )
                 .formLogin(withDefaults())
                 .httpBasic(withDefaults())

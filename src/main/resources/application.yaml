@@ -55,7 +55,8 @@ logging:
 #    name: logs/vacation_balance.log
 vacation:
   increment:
-    cron: "0 0 0 * * ?"
+    cron: "0 0 0 * * *"
+#    cron = "0 45 10 * * *"
 #    root: DEBUG
 #spring.jpa.defer-datasource-initialization=true
 org:

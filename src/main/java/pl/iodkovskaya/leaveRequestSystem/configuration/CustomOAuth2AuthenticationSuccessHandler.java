@@ -29,9 +29,9 @@ public class CustomOAuth2AuthenticationSuccessHandler implements AuthenticationS
         String login = oAuth2User.getAttribute("login");
 
         try {
-//            UserDetails userDetails = userService.loadUserByUsername(username);
             UserDetails userDetails = customUserDetailsService.loadUserByUsername(login);
-        } catch (UsernameNotFoundException | NullPointerException e){
+            System.out.println("Login " + login);
+        } catch (UsernameNotFoundException | NullPointerException e) {
             userService.registerOAuth2User(login);
         }
 
