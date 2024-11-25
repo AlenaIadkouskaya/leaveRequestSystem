@@ -77,7 +77,7 @@ public class VacationBalanceServiceImpl implements VacationBalanceService, Reque
     }
 
     //@Scheduled(cron = "#{@vacationIncrementCron}")
-    @Scheduled(cron = "0 59 10 * * *")
+    @Scheduled(cron = "0 22 17 * * *")
     @Transactional
     @Override
     public void incrementVacationDaysMonthly() {

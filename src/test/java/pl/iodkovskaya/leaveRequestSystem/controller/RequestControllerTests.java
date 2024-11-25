@@ -1,8 +1,11 @@
 package pl.iodkovskaya.leaveRequestSystem.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,6 +24,7 @@ import pl.iodkovskaya.leaveRequestSystem.model.entity.vacationbalance.VacationBa
 import pl.iodkovskaya.leaveRequestSystem.reposityry.RequestRepository;
 import pl.iodkovskaya.leaveRequestSystem.reposityry.UserRepository;
 import pl.iodkovskaya.leaveRequestSystem.reposityry.VacationBalanceRepository;
+import pl.iodkovskaya.leaveRequestSystem.service.RequestService;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -29,6 +33,9 @@ import java.util.UUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -39,7 +46,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class RequestControllerTests {
     @Autowired
     private MockMvc mockMvc;
-
+    @Mock
+    private RequestService requestService;
     @Autowired
     private ObjectMapper objectMapper;
     @Autowired
@@ -56,6 +64,7 @@ public class RequestControllerTests {
         requestRepository.deleteAll();
         userRepository.deleteAll();
         vacationBalanceRepository.deleteAll();
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
@@ -180,11 +189,14 @@ public class RequestControllerTests {
     @WithMockUser(username = "manager@gmail.com", password = "1", roles = "MANAGER")
     void should_return_not_found_when_request_not_found_when_approving_request() throws Exception {
         // given
-        UUID technicalId = UUID.randomUUID();
+        UUID invalidTechnicalId = UUID.randomUUID();
+        doThrow(new EntityNotFoundException("Request not found with technical ID: " + invalidTechnicalId))
+                .when(requestService).approveRequest(anyString(), eq(invalidTechnicalId));
 
         // when & then
-        mockMvc.perform(patch("/api/leave-requests/approve")
-                        .param("technicalId", technicalId.toString()))
+        mockMvc.perform(patch("/approve")
+                        .param("technicalId", invalidTechnicalId.toString())
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
 
     }

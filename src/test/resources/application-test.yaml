@@ -4,9 +4,6 @@ spring:
     driver-class-name: org.h2.Driver
     username: sa
     password:
-#  h2:
-#    console:
-#      enabled: true
   jpa:
     hibernate:
       ddl-auto: create-drop
@@ -17,3 +14,12 @@ spring:
   sql:
     init:
       mode: NEVER
+org:
+  jobrunr:
+    background-job-server:
+      enabled: false
+    dashboard:
+      enabled: false
+    jobs:
+      default-number-of-retries: 0
+      retry-interval: PT0S

@@ -224,6 +224,8 @@ public class UserServiceTests {
         RoleEntity roleEntity = mock(RoleEntity.class);
         when(roleService.findRoleByName("ROLE_USER")).thenReturn(roleEntity);
         when(passwordEncoder.encode(userDto.getPassword())).thenReturn("encodedPassword");
+        UserEntity newUser = new UserEntity("testLogin", "encodedPassword", "FirstName", "LastName", "test@example.com", roleEntity, true);
+        when(userRepository.save(any(UserEntity.class))).thenReturn(newUser);
 
         // when
         userService.registerNewUser(userDto);

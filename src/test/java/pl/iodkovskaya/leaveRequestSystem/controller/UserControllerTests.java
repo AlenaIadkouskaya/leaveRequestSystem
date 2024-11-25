@@ -2,11 +2,14 @@ package pl.iodkovskaya.leaveRequestSystem.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
+import org.jobrunr.configuration.JobRunrConfiguration;
+import org.jobrunr.storage.StorageProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
@@ -36,6 +39,11 @@ public class UserControllerTests {
     private UserRepository userRepository;
     @Autowired
     private RoleRepository roleRepository;
+    @MockBean
+    private StorageProvider storageProvider;
+
+    @MockBean
+    private JobRunrConfiguration.JobRunrConfigurationResult jobRunr;
 
     @BeforeEach
     void setUp() {
@@ -55,8 +63,7 @@ public class UserControllerTests {
         mockMvc.perform(post("/api/users/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userDto)))
-                .andExpect(status().isOk())
-                .andExpect(content().string("User registered successfully"));
+                .andExpect(status().isCreated());
     }
 
     @Test

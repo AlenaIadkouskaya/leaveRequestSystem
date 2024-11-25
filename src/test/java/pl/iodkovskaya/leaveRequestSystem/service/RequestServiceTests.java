@@ -20,7 +20,10 @@ import pl.iodkovskaya.leaveRequestSystem.reposityry.RequestRepository;
 
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -128,7 +131,7 @@ public class RequestServiceTests {
         when(userService.findUserByEmail(userEmail)).thenReturn(null);
 
         // when
-        Executable e = () -> requestService.approveRequest(userEmail, technicalId);
+        Executable e = () -> requestService.approveRequestAsync(userEmail, technicalId);
 
         // then
         assertThrows(EntityNotFoundException.class, e);
@@ -144,7 +147,7 @@ public class RequestServiceTests {
         when(requestRepository.findByTechnicalId(technicalId)).thenReturn(Optional.empty());
 
         // when
-        Executable e = () -> requestService.approveRequest(userEmail, technicalId);
+        Executable e = () -> requestService.approveRequestAsync(userEmail, technicalId);
 
         // then
         assertThrows(EntityNotFoundException.class, e);
@@ -161,7 +164,7 @@ public class RequestServiceTests {
         when(requestRepository.findByTechnicalId(technicalId)).thenReturn(Optional.of(request));
 
         // when
-        requestService.approveRequest(userEmail, technicalId);
+        requestService.approveRequestAsync(userEmail, technicalId);
 
         // then
         verify(request).approve(approver);
@@ -179,7 +182,7 @@ public class RequestServiceTests {
         when(requestRepository.findByTechnicalId(technicalId)).thenReturn(Optional.of(request));
         doNothing().when(logService).logApprovalAttempt(technicalId, approver.getUserId(), "APPROVE");
         // when
-        Executable e = () -> requestService.approveRequest(userEmail, technicalId);
+        Executable e = () -> requestService.approveRequestAsync(userEmail, technicalId);
 
         // then
         assertThrows(StatusException.class, e);

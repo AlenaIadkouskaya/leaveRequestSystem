@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import pl.iodkovskaya.leaveRequestSystem.exception.InvalidOperationException;
 import pl.iodkovskaya.leaveRequestSystem.exception.UserAlreadyExistsException;
 import pl.iodkovskaya.leaveRequestSystem.model.dto.UserDto;
+import pl.iodkovskaya.leaveRequestSystem.model.entity.request.RequestEntity;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.role.RoleEntity;
 import pl.iodkovskaya.leaveRequestSystem.model.entity.user.UserEntity;
 import pl.iodkovskaya.leaveRequestSystem.reposityry.UserRepository;
@@ -57,14 +58,16 @@ public class UserServiceImpl implements UserService {
             throw new UserAlreadyExistsException("User with email: " + user.getEmail() + " exists!");
         }
         try {
-            UserEntity newUser = userRepository.save(new UserEntity(user.getLogin(),
+            UserEntity newUser = new UserEntity(user.getLogin(),
                     passwordEncoder.encode(user.getPassword()),
                     user.getLastName(),
                     user.getFirstName(),
                     user.getEmail(),
                     roleService.findRoleByName("ROLE_USER"),
-                    true));
-            return newUser.getUserId();
+                    true);
+
+            UserEntity savedUser = userRepository.save(newUser);
+            return savedUser.getUserId();
         } catch (RuntimeException e) {
             throw new RuntimeException("Transaction failed while registering new user", e);
         }

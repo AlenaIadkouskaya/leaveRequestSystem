@@ -30,7 +30,7 @@ public class CustomOAuth2AuthenticationSuccessHandler implements AuthenticationS
 
         try {
             UserDetails userDetails = customUserDetailsService.loadUserByUsername(login);
-            System.out.println("Login " + login);
+            System.out.println("You are logged in " + login);
         } catch (UsernameNotFoundException | NullPointerException e) {
             userService.registerOAuth2User(login);
         }

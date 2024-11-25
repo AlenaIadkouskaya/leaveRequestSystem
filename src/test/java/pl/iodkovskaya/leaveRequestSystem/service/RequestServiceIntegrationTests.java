@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Bean;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import pl.iodkovskaya.leaveRequestSystem.exception.InvalidOperationException;
@@ -26,6 +28,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -111,7 +114,7 @@ public class RequestServiceIntegrationTests {
         userRepository.save(user);
 
         // when
-        Executable e = () -> requestService.approveRequest(testUserEmail, testRequestId);
+        Executable e = () -> requestService.approveRequestAsync(testUserEmail, testRequestId);
 
         // then
         assertThrows(EntityNotFoundException.class, e);
@@ -122,6 +125,7 @@ public class RequestServiceIntegrationTests {
     }
 
     @Test
+    //@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
     @Transactional
     public void should_cascade_delete_approvers_when_request_deleted() {
         // given

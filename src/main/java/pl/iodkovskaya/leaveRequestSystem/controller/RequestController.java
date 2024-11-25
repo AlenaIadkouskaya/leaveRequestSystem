@@ -42,34 +42,34 @@ public class RequestController {
     @PreAuthorize("hasRole('ROLE_MANAGER') or hasRole('ROLE_HR')")
     public ResponseEntity<String> approveRequest(@AuthenticationPrincipal UserDetails currentUser,
                                                  @RequestParam UUID technicalId) throws AccessDeniedException, InterruptedException {
-        //requestService.approveRequest(currentUser.getUsername(), technicalId);
-        ExecutorService executor = Executors.newFixedThreadPool(2);
-        CountDownLatch latch = new CountDownLatch(2);
-
-        executor.submit(() -> {
-            try {
-                latch.await();
-                requestService.approveRequest(currentUser.getUsername(), technicalId);
-                System.out.println("Thread 1: Request approved successfully");
-            } catch (Exception e) {
-                System.out.println("Thread 1 failed: " + e.getMessage());
-            }
-        });
-
-        executor.submit(() -> {
-            try {
-                latch.await();
-                requestService.approveRequest("manager@gmail.com", technicalId);
-                System.out.println("Thread 2: Request approved successfully");
-            } catch (Exception e) {
-                System.out.println("Thread 2 failed: " + e.getMessage() + e.getClass().getName());
-            }
-        });
-        latch.countDown();
-        latch.countDown();
-
-        executor.shutdown();
-        executor.awaitTermination(10, TimeUnit.SECONDS);
+        requestService.approveRequest(currentUser.getUsername(), technicalId);
+//        ExecutorService executor = Executors.newFixedThreadPool(2);
+//        CountDownLatch latch = new CountDownLatch(2);
+//
+//        executor.submit(() -> {
+//            try {
+//                latch.await();
+//                requestService.approveRequest(currentUser.getUsername(), technicalId);
+//                System.out.println("Thread 1: Request approved successfully");
+//            } catch (Exception e) {
+//                System.out.println("Thread 1 failed: " + e.getMessage());
+//            }
+//        });
+//
+//        executor.submit(() -> {
+//            try {
+//                latch.await();
+//                requestService.approveRequest("manager@gmail.com", technicalId);
+//                System.out.println("Thread 2: Request approved successfully");
+//            } catch (Exception e) {
+//                System.out.println("Thread 2 failed: " + e.getMessage() + e.getClass().getName());
+//            }
+//        });
+//        latch.countDown();
+//        latch.countDown();
+//
+//        executor.shutdown();
+//        executor.awaitTermination(10, TimeUnit.SECONDS);
 
         return ResponseEntity.status(HttpStatus.OK).body("Request has been approved");
     }
