@@ -11,7 +11,7 @@ import java.util.List;
 public interface UserService {
     void registerOAuth2User(String login);
 
-    void registerNewUser(UserDto user);
+    Long registerNewUser(UserDto user);
 
     UserEntity findUserByEmail(String email);
 

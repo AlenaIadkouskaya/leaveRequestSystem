@@ -21,8 +21,8 @@ public class UserController {
 
     @PostMapping("/register")
     public ResponseEntity<String> registerUser(@RequestBody UserDto userDto) {
-        userService.registerNewUser(userDto);
-        return ResponseEntity.ok("User registered successfully");
+        Long userId = userService.registerNewUser(userDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(String.valueOf(userId));
     }
 
     @PatchMapping("/add-role/{email}")

@@ -50,20 +50,21 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void registerNewUser(UserDto user) {
+    public Long registerNewUser(UserDto user) {
         UserEntity userEntity = userRepository.findByEmail(user.getEmail());
 
         if (userEntity != null) {
             throw new UserAlreadyExistsException("User with email: " + user.getEmail() + " exists!");
         }
         try {
-            userRepository.save(new UserEntity(user.getLogin(),
+            UserEntity newUser = userRepository.save(new UserEntity(user.getLogin(),
                     passwordEncoder.encode(user.getPassword()),
                     user.getLastName(),
                     user.getFirstName(),
                     user.getEmail(),
                     roleService.findRoleByName("ROLE_USER"),
                     true));
+            return newUser.getUserId();
         } catch (RuntimeException e) {
             throw new RuntimeException("Transaction failed while registering new user", e);
         }
