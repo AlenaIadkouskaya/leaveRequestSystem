@@ -16,10 +16,6 @@ import pl.iodkovskaya.leaveRequestSystem.service.RequestService;
 import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 @AllArgsConstructor
 @RestController
@@ -43,34 +39,6 @@ public class RequestController {
     public ResponseEntity<String> approveRequest(@AuthenticationPrincipal UserDetails currentUser,
                                                  @RequestParam UUID technicalId) throws AccessDeniedException, InterruptedException {
         requestService.approveRequest(currentUser.getUsername(), technicalId);
-//        ExecutorService executor = Executors.newFixedThreadPool(2);
-//        CountDownLatch latch = new CountDownLatch(2);
-//
-//        executor.submit(() -> {
-//            try {
-//                latch.await();
-//                requestService.approveRequest(currentUser.getUsername(), technicalId);
-//                System.out.println("Thread 1: Request approved successfully");
-//            } catch (Exception e) {
-//                System.out.println("Thread 1 failed: " + e.getMessage());
-//            }
-//        });
-//
-//        executor.submit(() -> {
-//            try {
-//                latch.await();
-//                requestService.approveRequest("manager@gmail.com", technicalId);
-//                System.out.println("Thread 2: Request approved successfully");
-//            } catch (Exception e) {
-//                System.out.println("Thread 2 failed: " + e.getMessage() + e.getClass().getName());
-//            }
-//        });
-//        latch.countDown();
-//        latch.countDown();
-//
-//        executor.shutdown();
-//        executor.awaitTermination(10, TimeUnit.SECONDS);
-
         return ResponseEntity.status(HttpStatus.OK).body("Request has been approved");
     }
 

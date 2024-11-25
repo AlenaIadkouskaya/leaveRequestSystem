@@ -21,7 +21,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Service
-//@AllArgsConstructor
 public class VacationBalanceServiceImpl implements VacationBalanceService, RequestListener {
     private final UserService userService;
     private final VacationBalanceRepository vacationBalanceRepository;
@@ -76,12 +75,10 @@ public class VacationBalanceServiceImpl implements VacationBalanceService, Reque
         vacationBalance.decreaseUsedDays(days);
     }
 
-    //@Scheduled(cron = "#{@vacationIncrementCron}")
-    @Scheduled(cron = "0 22 17 * * *")
+    @Scheduled(cron = "#{@vacationIncrementCron}")
     @Transactional
     @Override
     public void incrementVacationDaysMonthly() {
-        //List<VacationBalanceEntity> balances = vacationBalanceRepository.findAll();
         LocalDate today = LocalDate.now();
         int month = today.getMonthValue();
         int day = today.getDayOfMonth();
