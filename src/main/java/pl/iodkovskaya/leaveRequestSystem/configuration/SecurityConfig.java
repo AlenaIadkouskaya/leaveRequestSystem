@@ -52,11 +52,11 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
 
                 )
-                .formLogin().loginPage("/login").permitAll()
+                .formLogin().loginPage("/login.html").permitAll()
                 .and()
                 .httpBasic(withDefaults())
                 .oauth2Login(oauth2 -> oauth2
-                        .loginPage("/login")
+                        .loginPage("/login.html")
                         .successHandler(successHandler)
                 )
         ;
