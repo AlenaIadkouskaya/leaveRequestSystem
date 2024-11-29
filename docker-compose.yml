@@ -2,37 +2,32 @@ version: '3.9'
 
 services:
   java-app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-#    ports:
-#      - "8099"
+    build: .
+    expose:
+      - "8089"
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/mydatabase
-      - SPRING_DATASOURCE_USERNAME=myuser
-      - SPRING_DATASOURCE_PASSWORD=mypassword
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/vacations_requests
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=admin
     depends_on:
-      db:
-        condition: service_healthy
+      - postgres
     deploy:
       replicas: 3
+      restart_policy:
+        condition: on-failure
+      endpoint_mode: dnsrr
 
-  db:
-    image: postgres:15
+  postgres:
+    image: postgres:16.2
     container_name: postgres
     environment:
-      POSTGRES_DB: mydatabase
-      POSTGRES_USER: myuser
-      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: vacations_requests
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U myuser -d mydatabase"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
   nginx:
     image: nginx:latest

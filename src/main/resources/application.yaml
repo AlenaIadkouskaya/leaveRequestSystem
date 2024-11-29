@@ -5,9 +5,9 @@ spring:
     name: leaveRequestSystem
   datasource:
     username: <YOUR_USERNAME>
-    password: <YOUR_PASSWORD>>
-    url: jdbc:postgresql://localhost:5432/vacations_requests
-#    url: jdbc:postgresql://db:5432/mydatabase
+    password: <YOUR_PASSWORD>
+    url: jdbc:postgresql://postgres:5432/vacations_requests
+#    url: jdbc:postgresql://localhost:5432/vacations_requests
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -38,6 +38,7 @@ spring:
             user-info-uri: https://api.github.com/user
             user-name-attribute: id
   liquibase:
+    enabled: true
     change-log: classpath:db/changelog/db.changelog-master.yaml
 logging:
   level:
