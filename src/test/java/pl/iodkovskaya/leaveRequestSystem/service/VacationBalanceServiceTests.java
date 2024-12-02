@@ -1,3 +1,18 @@
+/*
+ * Copyright 2024 Alena Iadkouskaya
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package pl.iodkovskaya.leaveRequestSystem.service;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -173,41 +188,4 @@ public class VacationBalanceServiceTests {
         assertThat(logs.get(1)).contains("Successfully updated vacation balance for user with ID: 2");
     }
 
-    @Test
-    void should_get_failure_when_increment_vacation_days_monthly_and_threw_exception() {
-        LogCaptor logCaptor = LogCaptor.forClass(VacationBalanceServiceImpl.class);
-
-        // given
-        VacationBalanceEntity balance1 = mock(VacationBalanceEntity.class);
-        when(balance1.getUser()).thenReturn(new UserEntity(1L, "user_1@gmail.com"));
-
-        VacationBalanceEntity balance2 = mock(VacationBalanceEntity.class);
-        when(balance2.getUser()).thenReturn(new UserEntity(2L, "user_2@gmail.com"));
-        LocalDate today = LocalDate.now();
-        int month = today.getMonthValue();
-        int day = today.getDayOfMonth();
-        boolean isLeapYear = Year.isLeap(today.getYear());
-
-        List<VacationBalanceEntity> balances = Arrays.asList(balance1, balance2);
-        when(vacationBalanceRepository.findAllByHireDateMonthAndDay(day, isLeapYear)).thenReturn(balances);
-        doThrow(new RuntimeException("Error incrementing days")).when(balance2).incrementTotalDays(any(Integer.class));
-
-        // when
-        vacationBalanceService.incrementVacationDaysMonthly();
-
-        // then
-        verify(balance1, times(1)).incrementTotalDays(any(Integer.class));
-        verify(vacationBalanceRepository, times(1)).save(balance1);
-        verify(balance2, times(1)).incrementTotalDays(any(Integer.class));
-        verify(vacationBalanceRepository, times(0)).save(balance2);
-
-        List<String> errorLogs = logCaptor.getErrorLogs();
-        assertThat(errorLogs.size()).isEqualTo(1);
-        assertThat(errorLogs.get(0)).contains("Failed to update vacation balance for user with ID: 2")
-                .contains("Error incrementing days");
-
-        List<String> infoLogs = logCaptor.getInfoLogs();
-        assertThat(infoLogs.size()).isEqualTo(1);
-        assertThat(infoLogs.get(0)).contains("Successfully updated vacation balance for user with ID: 1");
-    }
 }

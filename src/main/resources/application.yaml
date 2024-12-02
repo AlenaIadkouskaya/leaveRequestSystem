@@ -6,8 +6,8 @@ spring:
   datasource:
     username: <YOUR_USERNAME>
     password: <YOUR_PASSWORD>
-    url: jdbc:postgresql://postgres:5432/vacations_requests
-#    url: jdbc:postgresql://localhost:5432/vacations_requests
+#    url: jdbc:postgresql://postgres:5432/vacations_requests
+    url: jdbc:postgresql://localhost:5432/vacations_requests
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
